@@ -1,7 +1,6 @@
-import controller.Clinica;
-
+import controller.ClinicaController;
 public class Main {
     public static void main(String[] args) throws Exception {
-        Clinica clinica = new Clinica();
+        ClinicaController clinica = new ClinicaController();
     }
 }
