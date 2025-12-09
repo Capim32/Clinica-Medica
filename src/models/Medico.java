@@ -1,14 +1,14 @@
 package models;
 
-public class Medico {
-    protected String nome;
-    protected int id;
+public class Medico extends Entidade {
+    
     protected String especialidade;
     protected int planoDeSaude;
     protected int atendimentos;
 
     public Medico(String nome) {
-        this.nome = nome;
+        super(nome);
+
         this.id = id;
         this.especialidade = especialidade;
         this.planoDeSaude = planoDeSaude;
@@ -16,8 +16,9 @@ public class Medico {
     }
     // talvez seja interessante conseguir puxar o médico pelo ID
     public Medico (int id) {
+        super(id);
+
         this.nome = nome;
-        this.id = id;
         this.especialidade = especialidade;
         this.planoDeSaude = planoDeSaude;
         this.atendimentos = atendimentos;

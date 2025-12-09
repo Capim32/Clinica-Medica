@@ -1,19 +1,19 @@
 package models;
 
-public class Paciente {
-    protected String nome;
-    protected int id;
+public class Paciente extends Entidade {
+    
+    protected int gravidade; // 1 - leve, 2 - moderado, 3 - grave
+    protected int estado; // aguardando atendimento, atendido, internado, liberado ... etc
     protected int planoDeSaude;
     
     public Paciente(String nome) {
-        this.nome = nome;
-        this.id = id;
+        super(nome);
         this.planoDeSaude = planoDeSaude;
     }
     // talvez seja interessante conseguir puxar o médico pelo ID
     public Paciente (int id) {
+        super(id);
         this.nome = nome;
-        this.id = id;
         this.planoDeSaude = planoDeSaude;
     }
 
