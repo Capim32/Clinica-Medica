@@ -3,16 +3,16 @@
 ## Durante o processo de criação do sistema, esse README será usado como TODO-list e para conversação entre os devs!
 
 ### MVC
-models (pacientes e médicos) view (recepção) controller (clínica)
+Models (clínica,pacientes e médicos) View (recepção) e Controller (clinicaController)
 
 ### Factory 
 pacienteFactory e medicoFactory
 
 ### Facade 
-main
+Main
 
 ### Exception
 as excessões serão tratadas no pacote exception para maior clareza
 
 ## Esquema de Organização
-### main -> controller -> (models e view)
+### Main -> ClinicaController -> (Clinica(instancia medicos e pacientes) e Recepção)
