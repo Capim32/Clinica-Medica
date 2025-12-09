@@ -1,5 +1,7 @@
+import controller.Clinica;
+
 public class Main {
     public static void main(String[] args) throws Exception {
-        System.out.println("hello, world");
+        Clinica clinica = new Clinica();
     }
 }
