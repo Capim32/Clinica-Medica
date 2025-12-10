@@ -3,10 +3,8 @@ package data;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
-
 import models.Medico;
 import models.Paciente;
-import models.Consulta;
 
 public class GerenciadorDeArquivos {
     // se não der certo o .txt com a interface gráfica, mudar pra .csv
@@ -29,7 +27,7 @@ public class GerenciadorDeArquivos {
         List<Medico> listaMedica = new ArrayList<>();
         File file = new File(PATH_MEDICOS);
 
-        if (!file.exists()) {return listaMedica;} // retorna a lista vazia
+        if (!file.exists()) {return listaMedica;} 
 
         try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
             String linha;
@@ -48,5 +46,34 @@ public class GerenciadorDeArquivos {
     }
 
     // replicar a lógica para Pacientes e Consultas
+
+    public static void salvarPaciente(Paciente paciente) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATH_PACIENTES, true))) {
+            String linha = paciente.getId() + ";" + paciente.getNome() + ";" + 
+                        paciente.getIdade() + ";" + paciente.getPlanoDeSaude();
+            writer.write(linha); 
+            writer.newLine();
+        }
+    }
+
+    public static List<Paciente> carregarPacientes() throws IOException {
+        List<Paciente> listaPacientes = new ArrayList<>();
+        File file = new File(PATH_PACIENTES);
+
+        if (!file.exists()) return listaPacientes;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                String[] dados = linha.split(";");
+                // cria o objeto Paciente usando os dados lidos
+                Paciente p = new Paciente(dados[1], Integer.parseInt(dados[2]));
+                p.setId(Integer.parseInt(dados[0]));
+                p.setPlanoDeSaude(dados[3]);
+                listaPacientes.add(p);
+            }
+        }
+        return listaPacientes;
+    }
     
 }

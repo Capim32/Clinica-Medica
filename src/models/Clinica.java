@@ -3,10 +3,6 @@ package models;
 import java.util.ArrayList;
 import java.util.List;
 
-import view.Recepcao;
-import enums.Cor;
-import exception.*;
-
 public class Clinica {
     private final String nome;
     private final List<Medico> medicos;
