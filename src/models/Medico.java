@@ -2,9 +2,9 @@ package models;
 
 public class Medico extends Entidade {
     
-    protected String especialidade;
-    protected int planoDeSaude;
-    protected int atendimentos;
+    private String especialidade;
+    private String planoDeSaude;
+    private int atendimentos;
 
     public Medico(String nome) {
         super(nome);
@@ -33,8 +33,8 @@ public class Medico extends Entidade {
     public String getEspecialidade() {return especialidade;}
     public void setEspecialidade(String especcialidade) {this.especialidade = especcialidade;}
 
-    public int getPlanoDeSaude() {return planoDeSaude;}
-    public void setPlanoDeSaude(int planoDeSaude) {this.planoDeSaude = planoDeSaude;}
+    public String getPlanoDeSaude() {return planoDeSaude;}
+    public void setPlanoDeSaude(String planoDeSaude) {this.planoDeSaude = planoDeSaude;}
 
     public int getAtendimentos() {return atendimentos;}
     public void setAtendimentos(int atendimentos) {this.atendimentos = atendimentos;}
