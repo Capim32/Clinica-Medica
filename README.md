@@ -3,11 +3,13 @@
 ## Durante o processo de criação do sistema, esse README será usado como TODO-list e para conversação entre os devs!
 
 ### MVC
-Models (clínica,pacientes e médicos) View (recepção) e Controller (clinicaController)
+Models (clínica,pacientes e médicos) View (telas do JFrame) e Controller (clinicaController)
+
+#### View
+TelaLogin -> TelaPrincipal
 
 ### Factory 
-pacienteFactory e medicoFactory
-
+EntidadeFactory (abstrato para que pacientes e medicos herdem)
 ### Facade 
 Main
 

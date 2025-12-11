@@ -1,21 +1,28 @@
 package view;
 
-import javax.swing.*;
-import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import controller.ClinicaController;
+import java.awt.*;
+import javax.swing.*;
 
 public class TelaPrincipal extends JFrame {
 
     private ClinicaController controller;
 
-    public TelaPrincipal() {
-        controller = new ClinicaController();
+    public TelaPrincipal(ClinicaController controller) {
+        this.controller = controller;
+
         setTitle("Sistema Clínica Médica");
         setSize(600, 400);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(new FlowLayout());
+
+        if (controller.getMedicoLogado() != null) {
+            add(new JLabel("Olá, Dr(a). " + controller.getMedicoLogado().getNome()));
+            // Adicione botões específicos de médico aqui
+        } else {
+            add(new JLabel("Olá, Paciente " + controller.getPacienteLogado().getNome()));
+             // Adicione botões específicos de paciente aqui
+        }
 
         JButton btnAgendar = new JButton("Agendar Consulta");
         JButton btnSair = new JButton("Sair");
