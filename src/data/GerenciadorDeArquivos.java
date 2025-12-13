@@ -51,6 +51,58 @@ public class GerenciadorDeArquivos {
         }
     }
 
+    public static int getProximoIdMedico() {
+        int maxId = 0;
+        File file = new File(PATH_MEDICOS); 
+
+        if (!file.exists()) return 1;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                if (linha.trim().isEmpty()) continue;
+                String[] dados = linha.split(";");
+                if (dados.length > 0) {
+                    try {
+                        int idAtual = Integer.parseInt(dados[0]);
+                        if (idAtual > maxId) {
+                            maxId = idAtual;
+                        }
+                    } catch (NumberFormatException ignored) { }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return maxId + 1;
+    }
+
+    public static int getProximoIdPaciente() {
+        int maxId = 0;
+        File file = new File(PATH_PACIENTES); 
+
+        if (!file.exists()) return 1;
+
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                if (linha.trim().isEmpty()) continue;
+                String[] dados = linha.split(";");
+                if (dados.length > 0) {
+                    try {
+                        int idAtual = Integer.parseInt(dados[0]);
+                        if (idAtual > maxId) {
+                            maxId = idAtual;
+                        }
+                    } catch (NumberFormatException ignored) { }
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return maxId + 1;
+    }
+
     // metodos de leitura e escrita se manteram qyase enguais a ultima versao (que eu nao subi pro github entao vai so spawnar tudo isso de uma vez)
 
     // talvez depois seja jogo mudar o ; como separador, mas meeeeeh

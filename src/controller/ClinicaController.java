@@ -1,35 +1,75 @@
 package controller;
 
-import data.GerenciadorDeArquivos;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import models.*;
 import view.*;
+import data.GerenciadorDeArquivos;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.IOException;
 
 public class ClinicaController {
     
-    // listas para manter os dados na memória enquanto o programa roda
     private List<Medico> medicos = new ArrayList<>();
     private List<Paciente> pacientes = new ArrayList<>();
     
-    // usuário logado atualmente (se ninguem logoou e null)
     private Medico medicoLogado;
     private Paciente pacienteLogado;
 
     public ClinicaController() {
         carregarDados();
-        // abre a tela de login ao iniciar o controller
-        new TelaLogin(this);  
+        iniciar(); // inicia o fluxo do programa
+    }
+
+    public void iniciar() {
+        new TelaInicial(this);
+    }
+
+    public void abrirTelaLogin() {
+        new TelaLogin(this);
+    }
+
+    public void abrirTelaCadastro() {
+        new TelaCadastro(this);
+    }
+
+    // --- LÓGICA DE CADASTRO ---
+    public void cadastrarUsuario(String tipo, String nome, String plano, String infoVariavel) throws IOException {
+        
+        if (tipo.equals("Médico")) {
+            // Gera o ID automaticamente
+            int novoId = GerenciadorDeArquivos.getProximoIdMedico();
+            
+            Medico m = new Medico(nome);
+            m.setId(novoId);
+            m.setPlanoDeSaude(plano);
+            m.setEspecialidade(infoVariavel);
+            
+            medicos.add(m);
+            GerenciadorDeArquivos.salvarMedico(m);
+            
+            javax.swing.JOptionPane.showMessageDialog(null, "Médico cadastrado com ID: " + novoId);
+        
+        } else {
+            int novoId = GerenciadorDeArquivos.getProximoIdPaciente();
+            
+            int idade = Integer.parseInt(infoVariavel);
+            Paciente p = new Paciente(nome, idade);
+            p.setId(novoId);
+            p.setPlanoDeSaude(plano);
+
+            pacientes.add(p);
+            GerenciadorDeArquivos.salvarPaciente(p);
+            
+            javax.swing.JOptionPane.showMessageDialog(null, "Paciente cadastrado com ID: " + novoId);
+        }
     }
 
     private void carregarDados() {
         try {
             medicos = GerenciadorDeArquivos.carregarMedicos();
             pacientes = GerenciadorDeArquivos.carregarPacientes();
-            System.out.println("Dados carregados com sucesso!");
         } catch (IOException e) {
-            System.err.println("Erro ao carregar arquivos: " + e.getMessage());
+            System.err.println("Erro ao carregar dados: " + e.getMessage());
         }
     }
 
@@ -38,7 +78,7 @@ public class ClinicaController {
             for (Medico m : medicos) {
                 if (m.getId() == id) {
                     this.medicoLogado = m;
-                    abrirTelaPrincipal();
+                    new TelaPrincipal(this);
                     return true;
                 }
             }
@@ -46,20 +86,14 @@ public class ClinicaController {
             for (Paciente p : pacientes) {
                 if (p.getId() == id) {
                     this.pacienteLogado = p;
-                    abrirTelaPrincipal();
+                    new TelaPrincipal(this);
                     return true;
                 }
             }
         }
         return false;
     }
-
-    private void abrirTelaPrincipal() {
-        // Passamos o controller para a tela principal também
-        new TelaPrincipal(this); 
-    }
     
-    // Getters para saber quem está logado
     public Medico getMedicoLogado() { return medicoLogado; }
     public Paciente getPacienteLogado() { return pacienteLogado; }
 }
