@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import models.Medico;
 import models.Paciente;
+import models.Consulta;
 
 // -> essa parte de gerenciamento de arquivos teve como base o trabalho de gerenciamento de arquivos
 
@@ -170,5 +171,17 @@ public class GerenciadorDeArquivos {
             }
         }
         return lista;
+    }
+
+    public static void salvarConsulta(int idMedico, int idPaciente, String data) throws IOException {
+        /* DEPOIS ADICIONAR NOS OUTROS PQ EU ESQUEÇO AAAAAAAAA
+        Formato no TXT: ID_MEDICO;ID_PACIENTE;DATA;STATUS;VALOR;PRONTUARIO
+        Status inicial: AGENDADA
+        */
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATH_CONSULTAS, true))) {
+            String linha = idMedico + ";" + idPaciente + ";" + data + ";AGENDADA;0.0;null";
+            writer.write(linha);
+            writer.newLine();
+        }
     }
 }

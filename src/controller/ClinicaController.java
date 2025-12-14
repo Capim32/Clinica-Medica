@@ -32,11 +32,10 @@ public class ClinicaController {
         new TelaCadastro(this);
     }
 
-    // --- LÓGICA DE CADASTRO ---
     public void cadastrarUsuario(String tipo, String nome, String plano, String infoVariavel) throws IOException {
         
         if (tipo.equals("Médico")) {
-            // Gera o ID automaticamente
+            // Gera o ID automaticamente em vez do usuário digitar o próprio ID 
             int novoId = GerenciadorDeArquivos.getProximoIdMedico();
             
             Medico m = new Medico(nome);
@@ -96,4 +95,29 @@ public class ClinicaController {
     
     public Medico getMedicoLogado() { return medicoLogado; }
     public Paciente getPacienteLogado() { return pacienteLogado; }
+
+
+    public void abrirTelaAgendamento() {
+        if (pacienteLogado != null) {
+            new TelaAgendamento(this, pacienteLogado);
+        } else {
+            javax.swing.JOptionPane.showMessageDialog(null, "Apenas pacientes podem agendar!");
+        }
+    }
+
+    // getter para preencher o combobox de médicos
+    public List<Medico> getListaMedicos() {
+        return medicos;
+    }
+
+    public boolean agendarConsulta(int idMedico, int idPaciente, String data) {
+        try {
+            GerenciadorDeArquivos.salvarConsulta(idMedico, idPaciente, data);
+            javax.swing.JOptionPane.showMessageDialog(null, "Consulta agendada com sucesso para " + data + "!");
+            return true;
+        } catch (IOException e) {
+            javax.swing.JOptionPane.showMessageDialog(null, "Erro ao salvar consulta: " + e.getMessage());
+            return false;
+        }
+    }
 }

@@ -2,41 +2,52 @@ package view;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
 import controller.ClinicaController;
 
 public class TelaCadastro extends JFrame {
     
     public TelaCadastro(ClinicaController controller) {
         setTitle("Cadastro de Usuário");
-        setSize(400, 350); 
+        setSize(400, 350);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(6, 2, 5, 5)); 
+        setLayout(new GridLayout(6, 2, 5, 5));
 
-        // componentes
+        // 1. Tipo de Usuário
         add(new JLabel("Tipo de Usuário:"));
         JComboBox<String> cbTipo = new JComboBox<>(new String[]{"Paciente", "Médico"});
         add(cbTipo);
 
+        // 2. Nome
         add(new JLabel("Nome:"));
         JTextField txtNome = new JTextField();
         add(txtNome);
 
+        // 3. Variável (Idade ou Especialidade)
         JLabel lblVariavel = new JLabel("Idade:");
         JTextField txtVariavel = new JTextField();
         add(lblVariavel);
         add(txtVariavel);
 
+        // 4. Plano de Saúde (fica mais fácil assim do que o usuário digitar)
         add(new JLabel("Plano de Saúde:"));
-        JTextField txtPlano = new JTextField();
-        add(txtPlano);
+        String[] planos = {"Não tenho", "Hapvida", "Unimed", "Outro"};
+        JComboBox<String> cbPlano = new JComboBox<>(planos);
+        add(cbPlano);
 
-        JButton btnSalvar = new JButton("Salvar Cadastro");
+        // Botões
         JButton btnVoltar = new JButton("Voltar");
+        JButton btnSalvar = new JButton("Salvar Cadastro");
 
         add(btnVoltar);
         add(btnSalvar);
 
+        // define o botão "Salvar" como padrão da janela (pressionar Enter ativa ele)
+        this.getRootPane().setDefaultButton(btnSalvar);
+
+        // Lógica visual 
         cbTipo.addActionListener(e -> {
             if (cbTipo.getSelectedItem().equals("Médico")) {
                 lblVariavel.setText("Especialidade:");
@@ -53,7 +64,7 @@ public class TelaCadastro extends JFrame {
         btnSalvar.addActionListener(e -> {
             try {
                 String nome = txtNome.getText();
-                String plano = txtPlano.getText();
+                String plano = (String) cbPlano.getSelectedItem(); // Pega do Dropdown
                 String tipo = (String) cbTipo.getSelectedItem();
                 String infoVariavel = txtVariavel.getText();
 

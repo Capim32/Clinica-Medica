@@ -38,7 +38,8 @@ public class TelaPrincipal extends JFrame {
         JButton btnAgendar = new JButton("Agendar Consulta");
         JButton btnSair = new JButton("Sair");
 
-        btnAgendar.addActionListener(e -> abrirTelaAgendamento());
+        btnAgendar.addActionListener(e -> controller.abrirTelaAgendamento());
+
         
         add(new JLabel("Bem-vindo à Clínica"));
         add(btnAgendar);
