@@ -17,7 +17,7 @@ public class GerenciadorDeArquivos {
     private static final String PATH_PACIENTES =  DIRETORIO_DADOS + File.separator + "pacientes.txt";
     private static final String PATH_CONSULTAS =  DIRETORIO_DADOS + File.separator + "consultas.txt";
 
-    // Bloco estático: Executa automaticamente na primeira vez que esta classe for chamada (ideia do gepeto)
+    // Bloco estático: Executa automaticamente na primeira vez que esta classe for chamada
     static {
         verificarEInicializarArquivos();
     }
