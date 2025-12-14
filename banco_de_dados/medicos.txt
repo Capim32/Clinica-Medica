@@ -1,1 +1,2 @@
-1;Victor;cardiologia;hapivida
+1;Dr de Padres;PadreAria;Hapvida
+2;Hans Chucrute;Chucrute;Nao tenho

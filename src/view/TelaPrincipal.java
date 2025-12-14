@@ -36,20 +36,28 @@ public class TelaPrincipal extends JFrame {
         }
 
         JButton btnAgendar = new JButton("Agendar Consulta");
-        JButton btnSair = new JButton("Sair");
+        JButton btnVoltar = new JButton("Voltar");
 
         btnAgendar.addActionListener(e -> controller.abrirTelaAgendamento());
 
         
         add(new JLabel("Bem-vindo à Clínica"));
         add(btnAgendar);
-        add(btnSair);
+        add(btnVoltar);
+
+        this.getRootPane().setDefaultButton(btnAgendar);
         
         setVisible(true);
+
+        btnVoltar.addActionListener(e -> {
+            controller.fazerLogout(); // limpa a sessao e volta ao inicio
+            dispose(); // fecha essa janela
+        });
     }
 
     private void abrirTelaAgendamento() {
         // lógica para abrir outra janela
         JOptionPane.showMessageDialog(this, "Abrindo agendamento...");
     }
+
 }

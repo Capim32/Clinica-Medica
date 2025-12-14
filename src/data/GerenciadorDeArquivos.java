@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import java.util.List;
 import models.Medico;
 import models.Paciente;
-import models.Consulta;
 
 // -> essa parte de gerenciamento de arquivos teve como base o trabalho de gerenciamento de arquivos
 
@@ -33,7 +32,7 @@ public class GerenciadorDeArquivos {
                 }
             }
 
-            // 2. Verificar e criar cada arquivo individualmente
+            // 2. verificar e criar cada arquivo individualmente
             criarArquivoSeNaoExistir(new File(PATH_MEDICOS));
             criarArquivoSeNaoExistir(new File(PATH_PACIENTES));
             criarArquivoSeNaoExistir(new File(PATH_CONSULTAS));

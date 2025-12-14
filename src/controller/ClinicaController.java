@@ -1,11 +1,11 @@
 package controller;
 
+import data.GerenciadorDeArquivos;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import models.*;
 import view.*;
-import data.GerenciadorDeArquivos;
-import java.util.List;
-import java.util.ArrayList;
-import java.io.IOException;
 
 public class ClinicaController {
     
@@ -35,7 +35,7 @@ public class ClinicaController {
     public void cadastrarUsuario(String tipo, String nome, String plano, String infoVariavel) throws IOException {
         
         if (tipo.equals("Médico")) {
-            // Gera o ID automaticamente em vez do usuário digitar o próprio ID 
+            // gera o ID automaticamente em vez do usuário digitar o próprio ID 
             int novoId = GerenciadorDeArquivos.getProximoIdMedico();
             
             Medico m = new Medico(nome);
@@ -119,5 +119,12 @@ public class ClinicaController {
             javax.swing.JOptionPane.showMessageDialog(null, "Erro ao salvar consulta: " + e.getMessage());
             return false;
         }
+    }
+
+    // o método resolve o bug que faz com que o médico continue logado caso logue  com o médico, saia, logue com paciente  (trabalho do estagiário não remunerado)
+    public void fazerLogout() {
+        this.medicoLogado = null;
+        this.pacienteLogado = null;
+        iniciar(); // volta para a tela inicial
     }
 }

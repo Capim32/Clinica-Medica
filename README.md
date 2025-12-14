@@ -31,3 +31,5 @@ as excessões serão tratadas no pacote exception para maior clareza
 
 ## Esquema de Organização
 ### Main -> ClinicaController -> (Clinica(instancia medicos e pacientes) e Recepção)
+
+

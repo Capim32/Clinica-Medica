@@ -1,4 +1,3 @@
-1;victor;20;n√£o tenho
-2;victor hugo silva;20;hapivida
-3;usu√°rio da silva pinto;32;Unimed
-4;izabel;35;hapivida
+1;Padre Padreco;26;N„o tenho
+2;Teste;0;N„o tenho
+3;1;0;Nao tenho
