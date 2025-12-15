@@ -2,62 +2,262 @@ package view;
 
 import controller.ClinicaController;
 import java.awt.*;
+import java.time.LocalDate;
+import java.util.List;
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import models.Consulta;
+import models.Medico;
+import models.Paciente;
 
 public class TelaPrincipal extends JFrame {
 
     private ClinicaController controller;
+    private JTable tabela;
+    private DefaultTableModel tableModel;
+    private JComboBox<Integer> cbDia, cbMes, cbAno;
+    private JComboBox<String> cbFiltroEspecialidade, cbFiltroNome;
+    private DefaultListModel<String> listModelMedicos;
 
     public TelaPrincipal(ClinicaController controller) {
         this.controller = controller;
 
         setTitle("Sistema Clínica Médica");
-        setSize(600, 400);
+        setSize(850, 650);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setLayout(new FlowLayout());
-        setLocationRelativeTo(null); // Centralizar na tela
+        setLocationRelativeTo(null);
+        
+        JPanel headerPanel = new JPanel(new BorderLayout());
+        String nomeUser = controller.getMedicoLogado() != null ? 
+            "Dr(a). " + controller.getMedicoLogado().getNome() : 
+            "Paciente " + controller.getPacienteLogado().getNome();
+        
+        JLabel lblSaudacao = new JLabel("Olá, " + nomeUser);
+        lblSaudacao.setFont(new Font("Arial", Font.BOLD, 18));
+        lblSaudacao.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+        
+        JButton btnSair = new JButton("Sair");
+        btnSair.addActionListener(e -> { controller.fazerLogout(); dispose(); });
 
+        headerPanel.add(lblSaudacao, BorderLayout.WEST);
+        headerPanel.add(btnSair, BorderLayout.EAST);
+        add(headerPanel, BorderLayout.NORTH);
 
-        if (controller.getMedicoLogado() != null) {
-            add(new JLabel("Olá, Dr(a). " + controller.getMedicoLogado().getNome()));
-            /* botões:
-                - realizar consulta
-                - gerar 
-             */
+        if (controller.getMedicoLogado() != null) construirInterfaceMedico();
+        else construirInterfacePaciente();
+
+        setVisible(true);
+    }
+
+    private void construirInterfaceMedico() {
+        JPanel painelSuperior = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        painelSuperior.add(new JLabel("Consultas do dia: "));
+        cbDia = new JComboBox<>(); cbMes = new JComboBox<>(); cbAno = new JComboBox<>();
+        
+        int anoAtual = LocalDate.now().getYear();
+        for (int i = anoAtual - 1; i <= anoAtual + 5; i++) cbAno.addItem(i);
+        for (int i = 1; i <= 12; i++) cbMes.addItem(i);
+        for (int i=1; i<=31; i++) cbDia.addItem(i); 
+        
+        LocalDate hoje = LocalDate.now();
+        cbDia.setSelectedItem(hoje.getDayOfMonth());
+        cbMes.setSelectedItem(hoje.getMonthValue());
+        cbAno.setSelectedItem(hoje.getYear());
+
+        JButton btnAtualizar = new JButton("Carregar Agenda");
+        btnAtualizar.addActionListener(e -> atualizarTabelaMedico());
+        painelSuperior.add(cbDia); painelSuperior.add(new JLabel("/"));
+        painelSuperior.add(cbMes); painelSuperior.add(new JLabel("/"));
+        painelSuperior.add(cbAno); painelSuperior.add(btnAtualizar);
+
+        JPanel container = new JPanel(new BorderLayout());
+        container.add(painelSuperior, BorderLayout.NORTH);
+
+        String[] colunas = {"Data", "Status", "Paciente ID", "Valor", "Objeto"};
+        tableModel = new DefaultTableModel(colunas, 0) { public boolean isCellEditable(int r, int c) { return false; } };
+        tabela = new JTable(tableModel);
+        tabela.removeColumn(tabela.getColumnModel().getColumn(4));
+        container.add(new JScrollPane(tabela), BorderLayout.CENTER);
+        
+        JPanel panelBotoes = new JPanel();
+        JButton btnRealizar = new JButton("Marcar Realizada / Cobrar");
+        JButton btnEditar = new JButton("Editar Perfil");
+        // ADICIONADO: Botão Voltar para o médico
+        JButton btnVoltar = new JButton("Voltar");
+
+        btnRealizar.addActionListener(e -> realizarConsultaMedico());
+        btnEditar.addActionListener(e -> abrirDialogoEdicaoMedico());
+        btnVoltar.addActionListener(e -> { controller.fazerLogout(); dispose(); });
+
+        panelBotoes.add(btnRealizar);
+        panelBotoes.add(btnEditar);
+        panelBotoes.add(btnVoltar);
+        
+        container.add(panelBotoes, BorderLayout.SOUTH);
+        add(container, BorderLayout.CENTER);
+        atualizarTabelaMedico();
+    }
+
+    private void atualizarTabelaMedico() {
+        tableModel.setRowCount(0);
+        int d = (int) cbDia.getSelectedItem();
+        int m = (int) cbMes.getSelectedItem();
+        int a = (int) cbAno.getSelectedItem();
+        String dataStr = String.format("%02d/%02d/%04d", d, m, a);
+        List<Consulta> lista = controller.getConsultasDoMedicoPorData(controller.getMedicoLogado().getId(), dataStr);
+        for (Consulta c : lista) tableModel.addRow(new Object[]{c.getData(), c.getStatus(), c.getIdPaciente(), "R$ " + c.getValorPago(), c});
+    }
+
+    private void realizarConsultaMedico() {
+        int linha = tabela.getSelectedRow();
+        if (linha >= 0) {
+            // recupera o objeto Consulta da coluna oculta (índice 4)
+            Consulta c = (Consulta) tableModel.getValueAt(linha, 4); 
+            
+            if (c.getStatus().equals("REALIZADA")) {
+                JOptionPane.showMessageDialog(this, "Esta consulta já foi realizada.");
+                return;
+            }
+
+            // lógica de cobrança -> depois atualizar para valor fixo por especialidade
+            double valor = 0.0;
+            Paciente p = controller.getPacientePorId(c.getIdPaciente());
+            
+            boolean semPlano = false;
+            if (p != null) {
+                String plano = p.getPlanoDeSaude();
+                if (plano == null || plano.equalsIgnoreCase("Não tenho") || plano.equalsIgnoreCase("Nao tenho")) {
+                    semPlano = true;
+                }
+            }
+
+            if (semPlano) {
+                String valorStr = JOptionPane.showInputDialog(this, 
+                    "Paciente Particular (Sem Plano).\nInforme o valor da consulta (R$):", "0");
+                
+                if (valorStr == null) return; // cancelou
+                
+                try {
+                    valor = Double.parseDouble(valorStr.replace(",", "."));
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(this, "Valor inválido! Operação cancelada.");
+                    return;
+                }
+            } else {
+                JOptionPane.showMessageDialog(this, 
+                    "Paciente possui plano de saúde (" + (p != null ? p.getPlanoDeSaude() : "Desconhecido") + ").\n" +
+                    "O valor será registrado como R$ 0,00.");
+            }
+
+            controller.atualizarStatusConsulta(c, "REALIZADA", valor);
+            atualizarTabelaMedico();
+            
         } else {
-            add(new JLabel("Olá, Paciente " + controller.getPacienteLogado().getNome()));
-            /* botões:
-                - verificar médicos (outra janela para o usuário inserir nome e especialidade do médico)
-                - agendar consulta
-                - cancelar agendamento
-                - # APÓS A CONSULTA FINALIZADA o paciente deve poder avaliar o médico (opicional), com um texto e estrelas, isso deve entrar no BD para ser puxado por usuarios
-                que desejam ver as avaliações do médico 
-            */
+            JOptionPane.showMessageDialog(this, "Selecione uma consulta na tabela.");
         }
+    }
+    private void construirInterfacePaciente() {
+        JPanel panelCentral = new JPanel(new BorderLayout());
+        JPanel panelFiltros = new JPanel(new GridLayout(2, 2, 5, 5));
+        panelFiltros.setBorder(BorderFactory.createTitledBorder("Filtrar Médicos"));
 
-        JButton btnAgendar = new JButton("Agendar Consulta");
+        panelFiltros.add(new JLabel("Especialidade:"));
+        cbFiltroEspecialidade = new JComboBox<>();
+        cbFiltroEspecialidade.addItem("Todas");
+        for (String esp : ClinicaController.ESPECIALIDADES) cbFiltroEspecialidade.addItem(esp);
+        
+        panelFiltros.add(new JLabel("Nome (opcional):"));
+        cbFiltroNome = new JComboBox<>();
+        cbFiltroNome.setEditable(true);
+        
+        panelFiltros.add(cbFiltroEspecialidade);
+        panelFiltros.add(cbFiltroNome);
+
+        listModelMedicos = new DefaultListModel<>();
+        JList<String> listResultados = new JList<>(listModelMedicos);
+        
+        JButton btnBuscar = new JButton("Pesquisar / Atualizar Lista");
+        btnBuscar.addActionListener(e -> atualizarListaMedicosPaciente());
+        cbFiltroEspecialidade.addActionListener(e -> atualizarListaMedicosPaciente());
+
+        JPanel panelBuscaCompleto = new JPanel(new BorderLayout());
+        panelBuscaCompleto.add(panelFiltros, BorderLayout.CENTER);
+        panelBuscaCompleto.add(btnBuscar, BorderLayout.SOUTH);
+
+        JPanel panelBotoes = new JPanel();
+        JButton btnAgendar = new JButton("Agendar");
+        JButton btnAvaliar = new JButton("Avaliar Pendentes");
+        JButton btnEditar = new JButton("Meu Perfil");
         JButton btnVoltar = new JButton("Voltar");
 
         btnAgendar.addActionListener(e -> controller.abrirTelaAgendamento());
+        btnEditar.addActionListener(e -> abrirDialogoEdicaoPaciente());
+        btnAvaliar.addActionListener(e -> avaliarConsultas());
+        btnVoltar.addActionListener(e -> { controller.fazerLogout(); dispose(); });
 
-        
-        add(new JLabel("Bem-vindo à Clínica"));
-        add(btnAgendar);
-        add(btnVoltar);
+        panelBotoes.add(btnAgendar);
+        panelBotoes.add(btnAvaliar);
+        panelBotoes.add(btnEditar);
+        panelBotoes.add(btnVoltar);
 
-        this.getRootPane().setDefaultButton(btnAgendar);
-        
-        setVisible(true);
-
-        btnVoltar.addActionListener(e -> {
-            controller.fazerLogout(); // limpa a sessao e volta ao inicio
-            dispose(); // fecha essa janela
-        });
+        panelCentral.add(panelBuscaCompleto, BorderLayout.NORTH);
+        panelCentral.add(new JScrollPane(listResultados), BorderLayout.CENTER);
+        add(panelCentral, BorderLayout.CENTER);
+        add(panelBotoes, BorderLayout.SOUTH);
+        atualizarListaMedicosPaciente();
     }
 
-    private void abrirTelaAgendamento() {
-        // lógica para abrir outra janela
-        JOptionPane.showMessageDialog(this, "Abrindo agendamento...");
+    private void atualizarListaMedicosPaciente() {
+        listModelMedicos.clear();
+        String esp = (String) cbFiltroEspecialidade.getSelectedItem();
+        String nome = (String) cbFiltroNome.getEditor().getItem();
+        List<Medico> res = controller.buscarMedicosPorFiltro(esp, nome);
+        for (Medico m : res) {
+            String media = controller.getMediaAvaliacaoMedico(m.getId());
+            listModelMedicos.addElement(m.getId() + " - " + m.getNome() + " (" + m.getEspecialidade() + ") | " + m.getPlanoDeSaude() + " | Nota: " + media);
+        }
     }
 
+    private void avaliarConsultas() {
+        List<Consulta> minhas = controller.getConsultasDoPaciente(controller.getPacienteLogado().getId());
+        JComboBox<Consulta> cbPendentes = new JComboBox<>();
+        for (Consulta c : minhas) if ("REALIZADA".equals(c.getStatus()) && c.getAvaliacaoEstrelas() == 0) cbPendentes.addItem(c);
+        
+        if (cbPendentes.getItemCount() == 0) { JOptionPane.showMessageDialog(this, "Nada para avaliar."); return; }
+        
+        JTextField txtNota = new JTextField();
+        JTextField txtTexto = new JTextField();
+        Object[] msg = {"Consulta:", cbPendentes, "Nota (1-5):", txtNota, "Comentário:", txtTexto};
+        if (JOptionPane.showConfirmDialog(this, msg, "Avaliar", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+             try {
+                 int nota = Integer.parseInt(txtNota.getText());
+                 controller.avaliarMedico((Consulta)cbPendentes.getSelectedItem(), nota, txtTexto.getText());
+             } catch(Exception e) { JOptionPane.showMessageDialog(this, "Erro na nota."); }
+        }
+    }
+
+    private void abrirDialogoEdicaoMedico() {
+        Medico m = controller.getMedicoLogado();
+        JTextField txtNome = new JTextField(m.getNome());
+        JComboBox<String> boxEsp = new JComboBox<>(ClinicaController.ESPECIALIDADES);
+        boxEsp.setSelectedItem(m.getEspecialidade());
+        JComboBox<String> boxPlano = new JComboBox<>(ClinicaController.PLANOS);
+        boxPlano.setSelectedItem(m.getPlanoDeSaude());
+
+        Object[] msg = {"Nome:", txtNome, "Especialidade:", boxEsp, "Plano:", boxPlano};
+        if (JOptionPane.showConfirmDialog(this, msg, "Editar Perfil", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            controller.atualizarPerfilMedico(txtNome.getText(), (String)boxEsp.getSelectedItem(), (String)boxPlano.getSelectedItem());
+        }
+    }
+
+    private void abrirDialogoEdicaoPaciente() {
+        Paciente p = controller.getPacienteLogado();
+        JTextField txtNome = new JTextField(p.getNome());
+        JComboBox<String> boxPlano = new JComboBox<>(ClinicaController.PLANOS);
+        boxPlano.setSelectedItem(p.getPlanoDeSaude());
+        Object[] msg = {"Nome:", txtNome, "Plano:", boxPlano};
+        if (JOptionPane.showConfirmDialog(this, msg, "Editar Perfil", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
+            controller.atualizarPerfilPaciente(txtNome.getText(), (String)boxPlano.getSelectedItem());
+        }
+    }
 }

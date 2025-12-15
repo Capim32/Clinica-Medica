@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import models.Medico;
 import models.Paciente;
+import models.Consulta;
 
 // -> essa parte de gerenciamento de arquivos teve como base o trabalho de gerenciamento de arquivos
 
@@ -171,14 +172,71 @@ public class GerenciadorDeArquivos {
         }
         return lista;
     }
+    
+    public static List<Consulta> carregarConsultas() throws IOException {
+        List<Consulta> lista = new ArrayList<>();
+        File file = new File(PATH_CONSULTAS);
+        if (!file.exists()) return lista;
 
+        try (BufferedReader reader = new BufferedReader(new FileReader(file))) {
+            String linha;
+            while ((linha = reader.readLine()) != null) {
+                if (linha.trim().isEmpty()) continue;
+                String[] dados = linha.split(";");
+                if (dados.length >= 7) {
+                    // ID_MED;ID_PAC;DATA;STATUS;VALOR;ESTRELAS;TEXTO
+                    Consulta c = new Consulta(
+                        Integer.parseInt(dados[0]),
+                        Integer.parseInt(dados[1]),
+                        dados[2],
+                        dados[3],
+                        Double.parseDouble(dados[4]),
+                        Integer.parseInt(dados[5].equals("null") ? "0" : dados[5]), // Trata null
+                        dados[6]
+                    );
+                    lista.add(c);
+                }
+            }
+        }
+        return lista;
+    }
+
+    // método genérico para reescrever qualquer lista no arquivo (usado para atualizações)
+    public static void sobrescreverConsultas(List<Consulta> consultas) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATH_CONSULTAS, false))) { // false = sobrescrever
+            for (Consulta c : consultas) {
+                writer.write(c.toString());
+                writer.newLine();
+            }
+        }
+    }
+
+    public static void sobrescreverMedicos(List<Medico> medicos) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATH_MEDICOS, false))) {
+            for (Medico m : medicos) {
+                String linha = m.getId() + ";" + m.getNome() + ";" + 
+                               m.getEspecialidade() + ";" + m.getPlanoDeSaude();
+                writer.write(linha);
+                writer.newLine();
+            }
+        }
+    }
+    
+    public static void sobrescreverPacientes(List<Paciente> pacientes) throws IOException {
+        try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATH_PACIENTES, false))) {
+            for (Paciente p : pacientes) {
+                String linha = p.getId() + ";" + p.getNome() + ";" + 
+                               p.getIdade() + ";" + p.getPlanoDeSaude();
+                writer.write(linha);
+                writer.newLine();
+            }
+        }
+    }
+    
     public static void salvarConsulta(int idMedico, int idPaciente, String data) throws IOException {
-        /* DEPOIS ADICIONAR NOS OUTROS PQ EU ESQUEÇO AAAAAAAAA
-        Formato no TXT: ID_MEDICO;ID_PACIENTE;DATA;STATUS;VALOR;PRONTUARIO
-        Status inicial: AGENDADA
-        */
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATH_CONSULTAS, true))) {
-            String linha = idMedico + ";" + idPaciente + ";" + data + ";AGENDADA;0.0;null";
+            // estrelas = 0, texto = null
+            String linha = idMedico + ";" + idPaciente + ";" + data + ";AGENDADA;0.0;0;null";
             writer.write(linha);
             writer.newLine();
         }

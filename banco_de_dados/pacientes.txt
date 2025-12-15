@@ -1,3 +1,3 @@
-1;Padre Padreco;26;Não tenho
-2;Teste;0;Não tenho
-3;1;0;Nao tenho
+1;Sem plano;0;NÃ£o tenho
+2;HapPaciente;0;Hapvida
+3;Fael;6;NÃ£o tenho

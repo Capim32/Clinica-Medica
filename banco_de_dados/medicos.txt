@@ -1,2 +1,1 @@
-1;Dr de Padres;PadreAria;Hapvida
-2;Hans Chucrute;Chucrute;Nao tenho
+1;HapMedico;Geral;Hapvida
