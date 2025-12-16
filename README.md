@@ -7,7 +7,8 @@
 #### 2. Mexer na parte do médico para que seja possível realizar consultas (apagar o botão de realizar consulta) (done)
 #### 3. Adicionar os limitadores de visibilidade de médicos por plano de saúde (feito em partes, tá estranho ainda...)
 #### 4. Adicionar feedback do paciente pós consulta (review de texto + estrelas (atire logo)) (done)
-#### 5. 
+#### 5. Permitir que o Médico só possa fazer 3 atendimentos por dia
+#### 6. Adicionar um sistema de Cancelamento de consultas e uma Lista de Espera
 
 ### MVC
 Models (clínica, consultas, entidades, pacientes e médicos) View (telas do JFrame) e Controller (clinicaController)
