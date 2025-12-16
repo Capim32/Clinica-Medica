@@ -13,10 +13,11 @@
 Models (clínica,pacientes e médicos) View (telas do JFrame) e Controller (clinicaController)
 
 #### View
-TelaLogin -> TelaPrincipal
+TelaInicial -> TelaLogin, TelaCadastro -> TelaPrincipal -> TelaAgendamento
 
 ### Factory 
 EntidadeFactory (abstrato para que pacientes e medicos herdem)
+
 ### Facade 
 Main
 
@@ -24,12 +25,9 @@ Main
 vou começar a tentar implementar a interface gráfica usando Swing
 
 ### Persistência de dados
-no pacote data terá o gerenciador de arquivos, provavelmente para .txt (vou ver se funciona com a interface gráfica)
-
-### Exception
-as excessões serão tratadas no pacote exception para maior clareza
+o pacote data cuida da persistencia de dados em txt (é um banco de dados fake da silva, eu admito)
 
 ## Esquema de Organização
-### Main -> ClinicaController -> (Clinica(instancia medicos e pacientes) e Recepção)
+### Main -> ClinicaController -> Models, View e Data
 
 
