@@ -1,1 +1,1 @@
-1;HapMedico;Geral;Hapvida
+1;Doctorine;Geral;Não tenho

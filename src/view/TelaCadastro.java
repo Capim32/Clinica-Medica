@@ -10,7 +10,7 @@ import javax.swing.*;
 public class TelaCadastro extends JFrame {
     
     private JComboBox<Integer> cbDia, cbMes, cbAno;
-    private JComboBox<String> cbEspecialidade; // especialidade agora é ComBox
+    private JComboBox<String> cbEspecialidade; 
     private JPanel painelVariavel;
     private CardLayout cardLayout;
 
@@ -29,7 +29,6 @@ public class TelaCadastro extends JFrame {
         JTextField txtNome = new JTextField();
         add(txtNome);
 
-        // 3. campo variável (Data para Paciente e Especialidade para Médico)
         JLabel lblVariavel = new JLabel("Data de Nascimento:");
         add(lblVariavel);
 
@@ -37,11 +36,9 @@ public class TelaCadastro extends JFrame {
         cardLayout = new CardLayout();
         painelVariavel.setLayout(cardLayout);
 
-        // -- DATA (Paciente)
+        // DATA
         JPanel pnlData = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        cbDia = new JComboBox<>();
-        cbMes = new JComboBox<>();
-        cbAno = new JComboBox<>();
+        cbDia = new JComboBox<>(); cbMes = new JComboBox<>(); cbAno = new JComboBox<>();
         int anoAtual = LocalDate.now().getYear();
         for (int i = anoAtual; i >= 1900; i--) cbAno.addItem(i);
         for (int i = 1; i <= 12; i++) cbMes.addItem(i);
@@ -50,21 +47,19 @@ public class TelaCadastro extends JFrame {
         atualizarDias();
         pnlData.add(cbDia); pnlData.add(new JLabel("/")); pnlData.add(cbMes); pnlData.add(new JLabel("/")); pnlData.add(cbAno);
 
-        // -- ESPECIALIDADE (Médico)
+        // ESPECIALIDADE
         JPanel pnlEsp = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
-        cbEspecialidade = new JComboBox<>(ClinicaController.ESPECIALIDADES); // lista global
+        cbEspecialidade = new JComboBox<>(ClinicaController.ESPECIALIDADES);
         pnlEsp.add(cbEspecialidade);
 
         painelVariavel.add(pnlData, "DATA");
         painelVariavel.add(pnlEsp, "ESPECIALIDADE");
         add(painelVariavel);
 
-        // 4. Plano (LISTA GLOBAL)
         add(new JLabel("Plano de Saúde:"));
         JComboBox<String> cbPlano = new JComboBox<>(ClinicaController.PLANOS);
         add(cbPlano);
 
-        // Botões
         JButton btnVoltar = new JButton("Voltar");
         JButton btnSalvar = new JButton("Salvar Cadastro");
         add(btnVoltar); add(btnSalvar);
@@ -92,6 +87,7 @@ public class TelaCadastro extends JFrame {
                 String plano = (String) cbPlano.getSelectedItem();
                 String tipo = (String) cbTipo.getSelectedItem();
                 String infoVariavel = "";
+                String dadoExtra = "";
 
                 if (tipo.equals("Médico")) {
                     infoVariavel = (String) cbEspecialidade.getSelectedItem();
@@ -100,12 +96,16 @@ public class TelaCadastro extends JFrame {
                     int mes = (int) cbMes.getSelectedItem();
                     int ano = (int) cbAno.getSelectedItem();
                     LocalDate dataNasc = LocalDate.of(ano, mes, dia);
-                    if (dataNasc.isAfter(LocalDate.now())) throw new Exception("Data futura!");
+                    if (dataNasc.isAfter(LocalDate.now())) throw new Exception("Data futura (viajante no tempo)!");
+                    
                     int idade = Period.between(dataNasc, LocalDate.now()).getYears();
                     infoVariavel = String.valueOf(idade);
+                    
+                    // Formata a data para salvar (dadoExtra)
+                    dadoExtra = String.format("%02d/%02d/%04d", dia, mes, ano);
                 }
 
-                controller.cadastrarUsuario(tipo, nome, plano, infoVariavel);
+                controller.cadastrarUsuario(tipo, nome, plano, infoVariavel, dadoExtra);
                 controller.abrirTelaLogin(); 
                 dispose();
 
@@ -119,10 +119,10 @@ public class TelaCadastro extends JFrame {
     
     private void atualizarDias() {
         if (cbMes.getSelectedItem() == null || cbAno.getSelectedItem() == null) return;
-        int mes = (int) cbMes.getSelectedItem();
-        int ano = (int) cbAno.getSelectedItem();
+        int m = (int) cbMes.getSelectedItem();
+        int a = (int) cbAno.getSelectedItem();
         cbDia.removeAllItems();
-        int max = YearMonth.of(ano, mes).lengthOfMonth();
+        int max = YearMonth.of(a, m).lengthOfMonth();
         for (int i = 1; i <= max; i++) cbDia.addItem(i);
     }
 }

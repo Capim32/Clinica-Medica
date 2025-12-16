@@ -97,10 +97,10 @@ public class TelaAgendamento extends JFrame {
             LocalDate data = LocalDate.of(ano, mes, dia);
             
             if (data.isBefore(LocalDate.now())) {
-                JOptionPane.showMessageDialog(this, "Data inválida (passado)!");
+                JOptionPane.showMessageDialog(this, "Data inválida (viajante no tempo)!");
             } else {
                 String dataFmt = String.format("%02d/%02d/%04d", dia, mes, ano);
-                // Verifica plano 'Não tenho' para avisar cobrança
+                // verifica plano 'Não tenho' para avisar cobrança
                 String planoP = pacienteLogado.getPlanoDeSaude();
                 if (planoP.equalsIgnoreCase("Não tenho") || planoP.equalsIgnoreCase("Nao tenho")) {
                     int opt = JOptionPane.showConfirmDialog(this, "Consulta Particular (Sem Plano).\nO médico definirá o valor. Continuar?", "Aviso", JOptionPane.YES_NO_OPTION);

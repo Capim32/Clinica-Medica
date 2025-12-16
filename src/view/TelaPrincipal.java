@@ -82,17 +82,13 @@ public class TelaPrincipal extends JFrame {
         JPanel panelBotoes = new JPanel();
         JButton btnRealizar = new JButton("Marcar Realizada / Cobrar");
         JButton btnEditar = new JButton("Editar Perfil");
-        // ADICIONADO: Botão Voltar para o médico
         JButton btnVoltar = new JButton("Voltar");
 
         btnRealizar.addActionListener(e -> realizarConsultaMedico());
         btnEditar.addActionListener(e -> abrirDialogoEdicaoMedico());
         btnVoltar.addActionListener(e -> { controller.fazerLogout(); dispose(); });
 
-        panelBotoes.add(btnRealizar);
-        panelBotoes.add(btnEditar);
-        panelBotoes.add(btnVoltar);
-        
+        panelBotoes.add(btnRealizar); panelBotoes.add(btnEditar); panelBotoes.add(btnVoltar);
         container.add(panelBotoes, BorderLayout.SOUTH);
         add(container, BorderLayout.CENTER);
         atualizarTabelaMedico();
@@ -111,18 +107,11 @@ public class TelaPrincipal extends JFrame {
     private void realizarConsultaMedico() {
         int linha = tabela.getSelectedRow();
         if (linha >= 0) {
-            // recupera o objeto Consulta da coluna oculta (índice 4)
-            Consulta c = (Consulta) tableModel.getValueAt(linha, 4); 
+            Consulta c = (Consulta) tableModel.getValueAt(linha, 4);
+            if (c.getStatus().equals("REALIZADA")) { JOptionPane.showMessageDialog(this, "Já realizada."); return; }
             
-            if (c.getStatus().equals("REALIZADA")) {
-                JOptionPane.showMessageDialog(this, "Esta consulta já foi realizada.");
-                return;
-            }
-
-            // lógica de cobrança -> depois atualizar para valor fixo por especialidade
             double valor = 0.0;
             Paciente p = controller.getPacientePorId(c.getIdPaciente());
-            
             boolean semPlano = false;
             if (p != null) {
                 String plano = p.getPlanoDeSaude();
@@ -132,30 +121,19 @@ public class TelaPrincipal extends JFrame {
             }
 
             if (semPlano) {
-                String valorStr = JOptionPane.showInputDialog(this, 
-                    "Paciente Particular (Sem Plano).\nInforme o valor da consulta (R$):", "0");
-                
-                if (valorStr == null) return; // cancelou
-                
-                try {
-                    valor = Double.parseDouble(valorStr.replace(",", "."));
-                } catch (NumberFormatException ex) {
-                    JOptionPane.showMessageDialog(this, "Valor inválido! Operação cancelada.");
-                    return;
-                }
+                String valorStr = JOptionPane.showInputDialog(this, "Paciente Particular.\nValor (R$):", "0");
+                if (valorStr == null) return;
+                try { valor = Double.parseDouble(valorStr.replace(",", ".")); } 
+                catch (NumberFormatException ex) { JOptionPane.showMessageDialog(this, "Inválido!"); return; }
             } else {
-                JOptionPane.showMessageDialog(this, 
-                    "Paciente possui plano de saúde (" + (p != null ? p.getPlanoDeSaude() : "Desconhecido") + ").\n" +
-                    "O valor será registrado como R$ 0,00.");
+                JOptionPane.showMessageDialog(this, "Paciente com plano (" + (p!=null?p.getPlanoDeSaude():"?") + "). Valor: R$ 0,00");
             }
 
             controller.atualizarStatusConsulta(c, "REALIZADA", valor);
             atualizarTabelaMedico();
-            
-        } else {
-            JOptionPane.showMessageDialog(this, "Selecione uma consulta na tabela.");
-        }
+        } else { JOptionPane.showMessageDialog(this, "Selecione uma consulta."); }
     }
+
     private void construirInterfacePaciente() {
         JPanel panelCentral = new JPanel(new BorderLayout());
         JPanel panelFiltros = new JPanel(new GridLayout(2, 2, 5, 5));
@@ -195,10 +173,8 @@ public class TelaPrincipal extends JFrame {
         btnAvaliar.addActionListener(e -> avaliarConsultas());
         btnVoltar.addActionListener(e -> { controller.fazerLogout(); dispose(); });
 
-        panelBotoes.add(btnAgendar);
-        panelBotoes.add(btnAvaliar);
-        panelBotoes.add(btnEditar);
-        panelBotoes.add(btnVoltar);
+        panelBotoes.add(btnAgendar); panelBotoes.add(btnAvaliar);
+        panelBotoes.add(btnEditar); panelBotoes.add(btnVoltar);
 
         panelCentral.add(panelBuscaCompleto, BorderLayout.NORTH);
         panelCentral.add(new JScrollPane(listResultados), BorderLayout.CENTER);
@@ -218,10 +194,26 @@ public class TelaPrincipal extends JFrame {
         }
     }
 
+    // classe auxiliar para formatação
+    private class ItemConsulta {
+        Consulta c;
+        String label;
+        public ItemConsulta(Consulta c, String label) { this.c = c; this.label = label; }
+        @Override public String toString() { return label; }
+    }
+
     private void avaliarConsultas() {
         List<Consulta> minhas = controller.getConsultasDoPaciente(controller.getPacienteLogado().getId());
-        JComboBox<Consulta> cbPendentes = new JComboBox<>();
-        for (Consulta c : minhas) if ("REALIZADA".equals(c.getStatus()) && c.getAvaliacaoEstrelas() == 0) cbPendentes.addItem(c);
+        JComboBox<ItemConsulta> cbPendentes = new JComboBox<>();
+        
+        for (Consulta c : minhas) {
+            if ("REALIZADA".equals(c.getStatus()) && c.getAvaliacaoEstrelas() == 0) {
+                Medico m = controller.getMedicoPorId(c.getIdMedico());
+                String nomeMed = (m != null) ? m.getNome() : "ID " + c.getIdMedico();
+                String txt = String.format("%s - %s", c.getData(), nomeMed);
+                cbPendentes.addItem(new ItemConsulta(c, txt));
+            }
+        }
         
         if (cbPendentes.getItemCount() == 0) { JOptionPane.showMessageDialog(this, "Nada para avaliar."); return; }
         
@@ -231,8 +223,11 @@ public class TelaPrincipal extends JFrame {
         if (JOptionPane.showConfirmDialog(this, msg, "Avaliar", JOptionPane.OK_CANCEL_OPTION) == JOptionPane.OK_OPTION) {
              try {
                  int nota = Integer.parseInt(txtNota.getText());
-                 controller.avaliarMedico((Consulta)cbPendentes.getSelectedItem(), nota, txtTexto.getText());
-             } catch(Exception e) { JOptionPane.showMessageDialog(this, "Erro na nota."); }
+                 if(nota < 1 || nota > 5) throw new Exception("Nota inválida");
+                 ItemConsulta item = (ItemConsulta) cbPendentes.getSelectedItem();
+                 controller.avaliarMedico(item.c, nota, txtTexto.getText());
+                 JOptionPane.showMessageDialog(this, "Enviado!");
+             } catch(Exception e) { JOptionPane.showMessageDialog(this, "Erro: " + e.getMessage()); }
         }
     }
 

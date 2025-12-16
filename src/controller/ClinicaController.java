@@ -16,13 +16,12 @@ public class ClinicaController {
     private Medico medicoLogado;
     private Paciente pacienteLogado;
 
-    // Listas globais
     public static final String[] ESPECIALIDADES = {
         "Geral", "Obstetrícia", "Neurologia", "Cardiologia", "Dermatologia", "Pediatria", "Ortopedia"
     };
     
     public static final String[] PLANOS = {
-        "Não tenho", "Hapvida", "Unimed", "SUS"
+        "Não tenho", "Hapvida", "Unimed"
     };
 
     public ClinicaController() {
@@ -52,6 +51,7 @@ public class ClinicaController {
         }
     }
 
+    // login por ID
     public boolean realizarLogin(int id, String tipo) {
         if (tipo.equals("Médico")) {
             for (Medico m : medicos) {
@@ -72,24 +72,37 @@ public class ClinicaController {
         }
         return false;
     }
-    
+
+    // login por Dados (Nome + Extra)
+    public boolean realizarLoginPorDados(String nome, String dadoExtra, String tipo) {
+        if (tipo.equals("Médico")) {
+            for (Medico m : medicos) {
+                if (m.getNome().equalsIgnoreCase(nome) && m.getEspecialidade().equalsIgnoreCase(dadoExtra)) {
+                    this.medicoLogado = m;
+                    new TelaPrincipal(this);
+                    return true;
+                }
+            }
+        } else {
+            for (Paciente p : pacientes) {
+                // compara nome e data de nascimento
+                if (p.getNome().equalsIgnoreCase(nome) && p.getDataNascimento().equals(dadoExtra)) {
+                    this.pacienteLogado = p;
+                    new TelaPrincipal(this);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     public void fazerLogout() {
         this.medicoLogado = null;
         this.pacienteLogado = null;
         iniciar();
     }
 
-    // método auxiliar para buscar paciente
-    public Paciente getPacientePorId(int id) {
-        for (Paciente p : pacientes) {
-            if (p.getId() == id) {
-                return p;
-            }
-        }
-        return null;
-    }
-
-    public void cadastrarUsuario(String tipo, String nome, String plano, String infoVariavel) throws IOException {
+    public void cadastrarUsuario(String tipo, String nome, String plano, String infoVariavel, String dadoExtra) throws IOException {
         if (tipo.equals("Médico")) {
             int novoId = GerenciadorDeArquivos.getProximoIdMedico();
             Medico m = new Medico(nome);
@@ -102,7 +115,8 @@ public class ClinicaController {
         } else {
             int novoId = GerenciadorDeArquivos.getProximoIdPaciente();
             int idade = Integer.parseInt(infoVariavel);
-            Paciente p = new Paciente(nome, idade);
+            // usa o construtor com data de nascimento (dadoExtra)
+            Paciente p = new Paciente(nome, idade, dadoExtra);
             p.setId(novoId);
             p.setPlanoDeSaude(plano);
             pacientes.add(p);
@@ -111,59 +125,27 @@ public class ClinicaController {
         }
     }
 
-    // --- MÉTODOS DE FILTRO INTELIGENTE ---
+    // métodos auxiliares
+    public Paciente getPacientePorId(int id) {
+        for (Paciente p : pacientes) if (p.getId() == id) return p;
+        return null;
+    }
+    
+    public Medico getMedicoPorId(int id) {
+        for(Medico m : medicos) if(m.getId() == id) return m;
+        return null;
+    }
 
-    // retorna apenas médicos compatíveis com o plano do paciente
     public List<Medico> getMedicosCompativeis(Paciente p) {
         List<Medico> lista = new ArrayList<>();
         String planoP = p.getPlanoDeSaude();
-        
-        // verifica se paciente não tem plano (trata variações de string)
-        boolean semPlano = planoP == null || 
-                           planoP.equalsIgnoreCase("Não tenho") || 
-                           planoP.equalsIgnoreCase("Nao tenho");
+        boolean semPlano = planoP == null || planoP.equalsIgnoreCase("Não tenho") || planoP.equalsIgnoreCase("Nao tenho");
 
         for (Medico m : medicos) {
-            if (semPlano) {
-                // se não tem plano, vê todos os médicos (consulta particular)
-                lista.add(m);
-            } else {
-                // se tem plano, só vê médicos do MESMO plano
-                if (m.getPlanoDeSaude().equalsIgnoreCase(planoP)) {
-                    lista.add(m);
-                }
-            }
+            if (semPlano) lista.add(m);
+            else if (m.getPlanoDeSaude().equalsIgnoreCase(planoP)) lista.add(m);
         }
         return lista;
-    }
-
-    // métodos auxiliares de consulta e estatística
-    public List<Consulta> getConsultasDoMedicoPorData(int idMedico, String data) {
-        List<Consulta> lista = new ArrayList<>();
-        for (Consulta c : consultas) {
-            if (c.getIdMedico() == idMedico && c.getData().equals(data)) lista.add(c);
-        }
-        return lista;
-    }
-    
-    public List<Consulta> getConsultasDoPaciente(int idPaciente) {
-        List<Consulta> lista = new ArrayList<>();
-        for (Consulta c : consultas) {
-            if (c.getIdPaciente() == idPaciente) lista.add(c);
-        }
-        return lista;
-    }
-
-    public void atualizarStatusConsulta(Consulta c, String status, double valor) {
-        c.setStatus(status);
-        c.setValorPago(valor); 
-        try { GerenciadorDeArquivos.sobrescreverConsultas(consultas); } catch (Exception e) {}
-    }
-
-    public void avaliarMedico(Consulta c, int estrelas, String texto) {
-        c.setAvaliacaoEstrelas(estrelas);
-        c.setAvaliacaoTexto(texto);
-        try { GerenciadorDeArquivos.sobrescreverConsultas(consultas); } catch (Exception e) {}
     }
 
     public boolean agendarConsulta(int idMedico, int idPaciente, String data) {
@@ -177,6 +159,20 @@ public class ClinicaController {
         }
     }
 
+    public List<Consulta> getConsultasDoMedicoPorData(int idMedico, String data) {
+        List<Consulta> lista = new ArrayList<>();
+        for (Consulta c : consultas) {
+            if (c.getIdMedico() == idMedico && c.getData().equals(data)) lista.add(c);
+        }
+        return lista;
+    }
+
+    public void atualizarStatusConsulta(Consulta c, String status, double valor) {
+        c.setStatus(status);
+        c.setValorPago(valor);
+        try { GerenciadorDeArquivos.sobrescreverConsultas(consultas); } catch (Exception e) {}
+    }
+
     public List<Medico> buscarMedicosPorFiltro(String esp, String nome) {
         List<Medico> res = new ArrayList<>();
         String nLower = nome != null ? nome.toLowerCase() : "";
@@ -188,10 +184,6 @@ public class ClinicaController {
         }
         return res;
     }
-    
-    public List<Medico> getListaMedicos() { return medicos; }
-    public Medico getMedicoLogado() { return medicoLogado; }
-    public Paciente getPacienteLogado() { return pacienteLogado; }
     
     public String getMediaAvaliacaoMedico(int id) {
         double soma = 0; int count = 0;
@@ -211,6 +203,18 @@ public class ClinicaController {
         return r;
     }
 
+    public List<Consulta> getConsultasDoPaciente(int idPaciente) {
+        List<Consulta> lista = new ArrayList<>();
+        for (Consulta c : consultas) if (c.getIdPaciente() == idPaciente) lista.add(c);
+        return lista;
+    }
+
+    public void avaliarMedico(Consulta c, int estrelas, String texto) {
+        c.setAvaliacaoEstrelas(estrelas);
+        c.setAvaliacaoTexto(texto);
+        try { GerenciadorDeArquivos.sobrescreverConsultas(consultas); } catch (Exception e) {}
+    }
+    
     public void atualizarPerfilMedico(String n, String e, String p) {
         if (medicoLogado != null) {
             medicoLogado.setNome(n); medicoLogado.setEspecialidade(e); medicoLogado.setPlanoDeSaude(p);
@@ -224,4 +228,8 @@ public class ClinicaController {
             try { GerenciadorDeArquivos.sobrescreverPacientes(pacientes); } catch (Exception ex) {}
         }
     }
+
+    public List<Medico> getListaMedicos() { return medicos; }
+    public Medico getMedicoLogado() { return medicoLogado; }
+    public Paciente getPacienteLogado() { return pacienteLogado; }
 }
