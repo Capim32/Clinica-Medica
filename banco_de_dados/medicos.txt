@@ -1,3 +1,4 @@
 1;Hans Chucrute;Geral;Hapvida
 2;Chopper;Geral;Não tenho
 3;Law;Cardiologia;Unimed
+4;King Giullian;Pediatria;Não tenho

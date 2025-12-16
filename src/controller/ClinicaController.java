@@ -148,15 +148,70 @@ public class ClinicaController {
         return lista;
     }
 
+    // Cada médico só pode ter até 3 consultas por dia (que vida mansa...)
     public boolean agendarConsulta(int idMedico, int idPaciente, String data) {
+        // 1. contar quantas consultas ativas (AGENDADA ou REALIZADA) existem para este médico neste dia 
+        int agendadasNoDia = 0;
+        for (Consulta c : consultas) {
+            if (c.getIdMedico() == idMedico && c.getData().equals(data)) {
+                if (c.getStatus().equals("AGENDADA") || c.getStatus().equals("REALIZADA")) {
+                    agendadasNoDia++;
+                }
+            }
+        }
+
+        String statusInicial = "AGENDADA";
+        String msgAviso = "Consulta agendada com sucesso!";
+
+        if (agendadasNoDia >= 3) {
+            statusInicial = "EM_ESPERA";
+            msgAviso = "Atenção: A agenda deste dia está cheia.\nVocê foi colocado na LISTA DE ESPERA.";
+        }
+
         try {
-            GerenciadorDeArquivos.salvarConsulta(idMedico, idPaciente, data);
-            consultas.add(new Consulta(idMedico, idPaciente, data, "AGENDADA", 0.0, 0, "null"));
-            javax.swing.JOptionPane.showMessageDialog(null, "Consulta agendada!");
+            // salva na memória
+            Consulta nova = new Consulta(idMedico, idPaciente, data, statusInicial, 0.0, 0, "null");
+            consultas.add(nova);
+            
+            // salva no arquivo usando sobrescreverConsultas
+            GerenciadorDeArquivos.sobrescreverConsultas(consultas);
+            
+            javax.swing.JOptionPane.showMessageDialog(null, msgAviso);
             return true;
         } catch (IOException e) {
             return false;
         }
+    }
+
+    public void cancelarConsulta(Consulta c) {
+        if (!c.getStatus().equals("AGENDADA") && !c.getStatus().equals("EM_ESPERA")) {
+             javax.swing.JOptionPane.showMessageDialog(null, "Apenas consultas agendadas ou em espera podem ser canceladas.");
+             return;
+        }
+
+        String statusAntigo = c.getStatus();
+        c.setStatus("CANCELADA"); 
+
+        // 2. se a consulta estiver agendada, alguem na fila de espera é buscado para ocupar a vaga
+        if (statusAntigo.equals("AGENDADA")) {
+            for (Consulta fila : consultas) {
+                // busca: mesmo médico, mesma data, status EM_ESPERA
+                if (fila.getIdMedico() == c.getIdMedico() && 
+                    fila.getData().equals(c.getData()) && 
+                    fila.getStatus().equals("EM_ESPERA")) {
+                    
+                    fila.setStatus("AGENDADA"); // promove o primeiro que achar (mais antigo)
+                    javax.swing.JOptionPane.showMessageDialog(null, 
+                        "Consulta cancelada.\nUm paciente da lista de espera (ID " + fila.getIdPaciente() + ") assumiu a vaga.");
+                    break;
+                }
+            }
+        } else {
+             javax.swing.JOptionPane.showMessageDialog(null, "Você saiu da lista de espera.");
+        }
+
+        // escreve as alteracoes feitas
+        try { GerenciadorDeArquivos.sobrescreverConsultas(consultas); } catch (Exception e) {}
     }
 
     public List<Consulta> getConsultasDoMedicoPorData(int idMedico, String data) {

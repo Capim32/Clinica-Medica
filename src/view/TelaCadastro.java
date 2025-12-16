@@ -13,6 +13,7 @@ public class TelaCadastro extends JFrame {
     private JComboBox<String> cbEspecialidade; 
     private JPanel painelVariavel;
     private CardLayout cardLayout;
+    private JLabel lblPlano;
 
     public TelaCadastro(ClinicaController controller) {
         setTitle("Cadastro de Usuário");
@@ -56,7 +57,9 @@ public class TelaCadastro extends JFrame {
         painelVariavel.add(pnlEsp, "ESPECIALIDADE");
         add(painelVariavel);
 
-        add(new JLabel("Plano de Saúde:"));
+        lblPlano = new JLabel("Plano de Saúde:");
+        add(lblPlano);
+
         JComboBox<String> cbPlano = new JComboBox<>(ClinicaController.PLANOS);
         add(cbPlano);
 
@@ -70,6 +73,7 @@ public class TelaCadastro extends JFrame {
             String tipo = (String) cbTipo.getSelectedItem();
             if (tipo.equals("Médico")) {
                 lblVariavel.setText("Especialidade:");
+                lblPlano.setText("Convênio com Plano de Saúde: ");
                 cardLayout.show(painelVariavel, "ESPECIALIDADE");
             } else {
                 lblVariavel.setText("Data de Nascimento:");
