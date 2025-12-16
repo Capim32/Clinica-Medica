@@ -10,7 +10,7 @@
 #### 5. 
 
 ### MVC
-Models (clínica,pacientes e médicos) View (telas do JFrame) e Controller (clinicaController)
+Models (clínica, consultas, entidades, pacientes e médicos) View (telas do JFrame) e Controller (clinicaController)
 
 #### View
 TelaInicial -> TelaLogin, TelaCadastro -> TelaPrincipal -> TelaAgendamento
