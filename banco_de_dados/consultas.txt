@@ -1,1 +1,2 @@
-1;1;16/12/2025;REALIZADA;1200.99;1;doutora mercenária e carniceira, arrancou meu braço fora e cobrou 1200 reais por issi
+1;1;16/12/2025;REALIZADA;0.0;5;Chamando Dr. Hans Chucrute
+1;2;16/12/2025;REALIZADA;599.99;4;Otimo profissional, mas consulta cara.

@@ -1,1 +1,3 @@
-1;Doctorine;Geral;NÃ£o tenho
+1;Hans Chucrute;Geral;Hapvida
+2;Chopper;Geral;Não tenho
+3;Law;Cardiologia;Unimed
