@@ -165,14 +165,15 @@ public class ClinicaController {
 
         if (agendadasNoDia >= 3) {
             statusInicial = "EM_ESPERA";
-            msgAviso = "Atenção: A agenda deste dia está cheia.\nVocê foi colocado na LISTA DE ESPERA.";
+            msgAviso = "Atenção: Agenda cheia. Você foi para a LISTA DE ESPERA.";
         }
 
         try {
+            // "null" no prontuário (campo novo)
             // salva na memória
-            Consulta nova = new Consulta(idMedico, idPaciente, data, statusInicial, 0.0, 0, "null");
+            Consulta nova = new Consulta(idMedico, idPaciente, data, statusInicial, 0.0, 0, "null", "null");
             consultas.add(nova);
-            
+
             // salva no arquivo usando sobrescreverConsultas
             GerenciadorDeArquivos.sobrescreverConsultas(consultas);
             
@@ -222,10 +223,14 @@ public class ClinicaController {
         return lista;
     }
 
-    public void atualizarStatusConsulta(Consulta c, String status, double valor) {
+    public void atualizarStatusConsulta(Consulta c, String status, double valor, String prontuario) {
         c.setStatus(status);
         c.setValorPago(valor);
-        try { GerenciadorDeArquivos.sobrescreverConsultas(consultas); } catch (Exception e) {}
+        c.setProntuario(prontuario); 
+        
+        try { 
+            GerenciadorDeArquivos.sobrescreverConsultas(consultas); 
+        } catch (Exception e) {}
     }
 
     public List<Medico> buscarMedicosPorFiltro(String esp, String nome) {

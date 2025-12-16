@@ -8,8 +8,9 @@ public class Consulta {
     private double valorPago;
     private int avaliacaoEstrelas; // 0 se não avaliada
     private String avaliacaoTexto; // "null" se não avaliada
+    private String prontuario; // esqueci do prontuario yipiiie 
 
-    public Consulta(int idMedico, int idPaciente, String data, String status, double valor, int estrelas, String texto) {
+    public Consulta(int idMedico, int idPaciente, String data, String status, double valor, int estrelas, String texto, String prontuario) {
         this.idMedico = idMedico;
         this.idPaciente = idPaciente;
         this.data = data;
@@ -17,6 +18,7 @@ public class Consulta {
         this.valorPago = valor;
         this.avaliacaoEstrelas = estrelas;
         this.avaliacaoTexto = texto;
+        this.prontuario = prontuario;
     }
 
     public int getIdMedico() { return idMedico; }
@@ -35,10 +37,18 @@ public class Consulta {
     public String getAvaliacaoTexto() { return avaliacaoTexto; }
     public void setAvaliacaoTexto(String avaliacaoTexto) { this.avaliacaoTexto = avaliacaoTexto; }
 
+    public String getProntuario() { return prontuario; }
+    public void setProntuario(String prontuario) { this.prontuario = prontuario; }
+
     // método auxiliar para salvar no TXT
     @Override
     public String toString() {
-        // Formato: ID_MED;ID_PAC;DATA;STATUS;VALOR;ESTRELAS;TEXTO
-        return idMedico + ";" + idPaciente + ";" + data + ";" + status + ";" + valorPago + ";" + avaliacaoEstrelas + ";" + avaliacaoTexto;
+        // Formato: ID_MED;ID_PAC;DATA;STATUS;VALOR;ESTRELAS;TEXTO;PRONTUARIO
+        // Tratamento para evitar erro se for null
+        String rev = (avaliacaoTexto == null) ? "null" : avaliacaoTexto;
+        String pront = (prontuario == null) ? "null" : prontuario;
+        
+        return idMedico + ";" + idPaciente + ";" + data + ";" + status + ";" + valorPago + ";" + avaliacaoEstrelas + ";" + rev + ";" + pront;
     }
+
 }

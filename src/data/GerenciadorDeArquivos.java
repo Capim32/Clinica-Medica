@@ -158,8 +158,9 @@ public class GerenciadorDeArquivos {
     // --- CONSULTAS ---
     public static void salvarConsulta(int idMedico, int idPaciente, String data) throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(PATH_CONSULTAS, true))) {
-            // ID_MED;ID_PAC;DATA;STATUS;VALOR;ESTRELAS;TEXTO
-            String linha = idMedico + ";" + idPaciente + ";" + data + ";AGENDADA;0.0;0;null";
+            // adicionado ";null" no final para o prontuário vazio
+            // ID_MED;ID_PAC;DATA;STATUS;VALOR;ESTRELAS;TEXTO;PRONTUARIO
+            String linha = idMedico + ";" + idPaciente + ";" + data + ";AGENDADA;0.0;0;null;null";
             writer.write(linha);
             writer.newLine();
         }
@@ -175,7 +176,8 @@ public class GerenciadorDeArquivos {
             while ((linha = reader.readLine()) != null) {
                 if (linha.trim().isEmpty()) continue;
                 String[] dados = linha.split(";");
-                if (dados.length >= 7) {
+                // Agora esperamos 8 colunas
+                if (dados.length >= 8) {
                     Consulta c = new Consulta(
                         Integer.parseInt(dados[0]),
                         Integer.parseInt(dados[1]),
@@ -183,7 +185,8 @@ public class GerenciadorDeArquivos {
                         dados[3],
                         Double.parseDouble(dados[4]),
                         Integer.parseInt(dados[5].equals("null") ? "0" : dados[5]),
-                        dados[6]
+                        dados[6],
+                        dados[7] 
                     );
                     lista.add(c);
                 }
@@ -200,4 +203,5 @@ public class GerenciadorDeArquivos {
             }
         }
     }
+
 }

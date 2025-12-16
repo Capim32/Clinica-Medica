@@ -9,6 +9,7 @@
 #### 4. Adicionar feedback do paciente pós consulta (review de texto + estrelas (atire logo)) (done)
 #### 5. Permitir que o Médico só possa fazer 3 atendimentos por dia (done)
 #### 6. Adicionar um sistema de Cancelamento de consultas e uma Lista de Espera (done)
+#### 7. Review do Médico que esqueci (done)
 
 ### MVC
 Models (clínica, consultas, entidades, pacientes e médicos) View (telas do JFrame) e Controller (clinicaController)

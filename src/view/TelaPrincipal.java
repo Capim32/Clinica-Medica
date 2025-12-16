@@ -85,23 +85,87 @@ public class TelaPrincipal extends JFrame {
         add(container, BorderLayout.CENTER);
         atualizarTabelaMedico();
     }
+
     private void atualizarTabelaMedico() {
         tableModel.setRowCount(0);
         String dStr = String.format("%02d/%02d/%04d", cbDia.getSelectedItem(), cbMes.getSelectedItem(), cbAno.getSelectedItem());
         List<Consulta> l = controller.getConsultasDoMedicoPorData(controller.getMedicoLogado().getId(), dStr);
         for (Consulta c : l) tableModel.addRow(new Object[]{c.getData(), c.getStatus(), c.getIdPaciente(), "R$ "+c.getValorPago(), c});
     }
+
     private void realizarConsultaMedico() {
-        int l = tabela.getSelectedRow();
-        if (l >= 0) {
-            Consulta c = (Consulta) tableModel.getValueAt(l, 4);
-            if(c.getStatus().equals("REALIZADA")){JOptionPane.showMessageDialog(this,"Já realizada.");return;}
-            double v = 0.0; Paciente p = controller.getPacientePorId(c.getIdPaciente());
-            boolean sp = false; if(p!=null){String pl=p.getPlanoDeSaude(); if(pl==null||pl.equalsIgnoreCase("Não tenho")||pl.equalsIgnoreCase("Nao tenho")) sp=true;}
-            if(sp){ String s=JOptionPane.showInputDialog(this,"Paciente Particular. Valor:","0"); if(s==null)return; try{v=Double.parseDouble(s.replace(",","."));}catch(Exception e){return;} }
-            else JOptionPane.showMessageDialog(this,"Paciente com plano. Valor R$ 0,00");
-            controller.atualizarStatusConsulta(c,"REALIZADA",v); atualizarTabelaMedico();
-        } else JOptionPane.showMessageDialog(this,"Selecione uma consulta.");
+        int linha = tabela.getSelectedRow();
+        if (linha >= 0) {
+            Consulta c = (Consulta) tableModel.getValueAt(linha, 4);
+            
+            if (c.getStatus().equals("REALIZADA")) {
+                JOptionPane.showMessageDialog(this, "Esta consulta já foi realizada.\nProntuário: " + c.getProntuario());
+                return;
+            }
+
+            // 1. prontuário
+            JTextArea txtProntuario = new JTextArea(10, 30);
+            txtProntuario.setLineWrap(true);
+            txtProntuario.setWrapStyleWord(true);
+            
+            Object[] msgProntuario = {
+                "Descreva o atendimento (Sintomas, Tratamento, Exames):", 
+                new JScrollPane(txtProntuario)
+            };
+
+            int option = JOptionPane.showConfirmDialog(this, msgProntuario, "Realizar Consulta", JOptionPane.OK_CANCEL_OPTION);
+            
+            if (option == JOptionPane.OK_OPTION) {
+                String textoProntuario = txtProntuario.getText();
+                if (textoProntuario.trim().isEmpty()) {
+                    textoProntuario = "Sem observações.";
+                }
+                // evita quebra de linha no .txt (substitui Enter por espaço)
+                textoProntuario = textoProntuario.replace("\n", " ").replace(";", ",");
+
+                // 2. cobrança
+                double valor = 0.0;
+                Paciente p = controller.getPacientePorId(c.getIdPaciente());
+                
+                boolean semPlano = false;
+                if (p != null) {
+                    String plano = p.getPlanoDeSaude();
+                    if (plano == null || plano.equalsIgnoreCase("Não tenho") || plano.equalsIgnoreCase("Nao tenho")) {
+                        semPlano = true;
+                    }
+                }
+
+                if (semPlano) {
+                    // Se não tem plano, GERA CONTA (Médico decide o valor)
+                    String valorStr = JOptionPane.showInputDialog(this, 
+                        "Paciente Particular (Sem Plano).\n" +
+                        "Gere a cobrança de acordo com sua especialidade (R$):", "0");
+                    
+                    if (valorStr == null) return; // Cancelou
+                    
+                    try {
+                        valor = Double.parseDouble(valorStr.replace(",", "."));
+                    } catch (NumberFormatException ex) {
+                        JOptionPane.showMessageDialog(this, "Valor inválido! Operação cancelada.");
+                        return;
+                    }
+                } else {
+                    // Se tem plano, NÃO PAGA NADA
+                    JOptionPane.showMessageDialog(this, 
+                        "Paciente possui convênio (" + (p != null ? p.getPlanoDeSaude() : "?") + ").\n" +
+                        "A conta gerada para o paciente é R$ 0,00.");
+                    valor = 0.0;
+                }
+
+                // 3. salvar tudo
+                controller.atualizarStatusConsulta(c, "REALIZADA", valor, textoProntuario);
+                
+                JOptionPane.showMessageDialog(this, "Consulta registrada com sucesso!");
+                atualizarTabelaMedico();
+            }
+        } else {
+            JOptionPane.showMessageDialog(this, "Selecione uma consulta na tabela.");
+        }
     }
 
     private void construirInterfacePaciente() {

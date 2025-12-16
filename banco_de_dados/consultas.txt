@@ -1,9 +1,1 @@
-1;1;16/12/2025;REALIZADA;0.0;5;Chamando Dr. Hans Chucrute
-1;2;16/12/2025;REALIZADA;599.99;4;Otimo profissional, mas consulta cara.
-1;1;01/01/2026;CANCELADA;0.0;0;null
-1;1;16/12/2025;CANCELADA;0.0;0;null
-1;2;16/12/2025;CANCELADA;0.0;0;null
-1;4;16/12/2025;REALIZADA;199.99;0;null
-2;4;01/01/2026;AGENDADA;0.0;0;null
-1;4;01/01/2026;AGENDADA;0.0;0;null
-1;4;16/12/2025;EM_ESPERA;0.0;0;null
+1;1;01/01/2026;REALIZADA;1200.0;1;me mandou tirar uma soneca que amanhã é outro dia sendo que perdi as pernas em um acidente de balão;Paciente chato queria um atestado só porque perdeu as duas pernas em um acidente de balão, receitei tilenol e uma soneca que amanhã é outro dia.
