@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.List;
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import models.Medico;
 import models.Paciente;
 
@@ -20,29 +21,34 @@ public class TelaAgendamento extends JFrame {
         this.controller = controller;
         
         setTitle("Agendar Consulta");
-        setSize(450, 500);
+        setSize(500, 600); 
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
-        setLayout(new GridLayout(6, 1, 10, 10));
+        // BoxLayout para empilhar melhor os componentes de tamanhos variados
+        setLayout(new BoxLayout(getContentPane(), BoxLayout.Y_AXIS));
+        ((JComponent) getContentPane()).setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        JLabel lblTitulo = new JLabel("Agendamento para: " + pacienteLogado.getNome());
-        lblTitulo.setHorizontalAlignment(SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 14));
+        // 1. título
+        JLabel lblTitulo = new JLabel("Novo Agendamento");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 18));
+        lblTitulo.setAlignmentX(Component.CENTER_ALIGNMENT);
         add(lblTitulo);
+        add(Box.createVerticalStrut(20));
 
-        // SELEÇÃO DE MÉDICO COM FILTRO
-        JPanel painelMedico = new JPanel(new FlowLayout());
-        painelMedico.add(new JLabel("Médico:"));
+        // 2. seleção de médico
+        JPanel painelMedico = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        painelMedico.setMaximumSize(new Dimension(500, 40));
+        painelMedico.add(new JLabel("Selecione o Médico:"));
         
-        // MUDANÇA NESSA BOMBA: Usa getMedicosCompativeis em vez de getListaMedicos
         List<Medico> listaFiltrada = controller.getMedicosCompativeis(pacienteLogado);
-        
         cbMedicos = new JComboBox<>();
+        
         if (listaFiltrada.isEmpty()) {
-            cbMedicos.addItem("Nenhum médico aceita seu plano :(");
+            cbMedicos.addItem("Nenhum médico compatível.");
             cbMedicos.setEnabled(false);
         } else {
             for (Medico m : listaFiltrada) {
+                // Formatação simples no dropdown
                 cbMedicos.addItem(m.getId() + " - " + m.getNome() + " (" + m.getEspecialidade() + ")");
             }
         }
@@ -51,41 +57,66 @@ public class TelaAgendamento extends JFrame {
         painelMedico.add(cbMedicos);
         add(painelMedico);
 
-        // Reviews
-        txtReviews = new JTextArea(5, 30);
+        // 3. área de reviews (maior para melhor visualização)
+        JLabel lblRev = new JLabel("Reputação e Avaliações:");
+        lblRev.setAlignmentX(Component.LEFT_ALIGNMENT);
+        add(lblRev);
+        
+        txtReviews = new JTextArea(10, 30); 
         txtReviews.setEditable(false);
         txtReviews.setLineWrap(true);
         txtReviews.setWrapStyleWord(true);
+        txtReviews.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        
         JScrollPane scrollReviews = new JScrollPane(txtReviews);
-        scrollReviews.setBorder(BorderFactory.createTitledBorder("Avaliações"));
+        scrollReviews.setBorder(BorderFactory.createLineBorder(Color.LIGHT_GRAY));
+        // força um tamanho maior visualmente
+        scrollReviews.setPreferredSize(new Dimension(450, 200)); 
+        
         add(scrollReviews);
+        add(Box.createVerticalStrut(15));
 
-        // Data
-        JPanel painelData = new JPanel(new FlowLayout());
-        painelData.add(new JLabel("Data:"));
-        cbDia = new JComboBox<>(); cbMes = new JComboBox<>(); cbAno = new JComboBox<>();
+        // 4. data
+        JPanel painelData = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        painelData.setMaximumSize(new Dimension(500, 40));
+        painelData.add(new JLabel("Data Desejada:"));
+        
+        cbDia = new JComboBox<>(); 
+        cbMes = new JComboBox<>(); 
+        cbAno = new JComboBox<>();
         
         int anoAtual = LocalDate.now().getYear();
         for (int i = anoAtual; i <= anoAtual + 5; i++) cbAno.addItem(i);
         for (int i = 1; i <= 12; i++) cbMes.addItem(i);
+        
         cbMes.addActionListener(e -> atualizarDias());
         cbAno.addActionListener(e -> atualizarDias());
         atualizarDias();
         
-        painelData.add(cbDia); painelData.add(new JLabel("/"));
-        painelData.add(cbMes); painelData.add(new JLabel("/"));
+        painelData.add(cbDia); 
+        painelData.add(new JLabel("/"));
+        painelData.add(cbMes); 
+        painelData.add(new JLabel("/"));
         painelData.add(cbAno);
         add(painelData);
+        add(Box.createVerticalStrut(20));
 
-        // Botões
-        JPanel painelBotoes = new JPanel(new FlowLayout());
-        JButton btnAgendar = new JButton("Confirmar");
+        // 5. Botões
+        JPanel painelBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        JButton btnAgendar = new JButton("Confirmar Agendamento");
         JButton btnVoltar = new JButton("Cancelar");
-        painelBotoes.add(btnAgendar); painelBotoes.add(btnVoltar);
+        
+        btnAgendar.setBackground(new Color(0, 102, 204));
+        btnAgendar.setForeground(Color.WHITE);
+        btnAgendar.setPreferredSize(new Dimension(180, 35));
+        
+        painelBotoes.add(btnVoltar);
+        painelBotoes.add(btnAgendar);
         add(painelBotoes);
 
         this.getRootPane().setDefaultButton(btnAgendar);
 
+        // Ações
         btnAgendar.addActionListener(e -> {
             if (!cbMedicos.isEnabled() || cbMedicos.getSelectedItem() == null) return;
             
@@ -100,10 +131,14 @@ public class TelaAgendamento extends JFrame {
                 JOptionPane.showMessageDialog(this, "Data inválida (viajante no tempo)!");
             } else {
                 String dataFmt = String.format("%02d/%02d/%04d", dia, mes, ano);
-                // verifica plano 'Não tenho' para avisar cobrança
+                
                 String planoP = pacienteLogado.getPlanoDeSaude();
-                if (planoP.equalsIgnoreCase("Não tenho") || planoP.equalsIgnoreCase("Nao tenho")) {
-                    int opt = JOptionPane.showConfirmDialog(this, "Consulta Particular (Sem Plano).\nO médico definirá o valor. Continuar?", "Aviso", JOptionPane.YES_NO_OPTION);
+                boolean semPlano = (planoP == null || planoP.equalsIgnoreCase("Não tenho") || planoP.equalsIgnoreCase("Nao tenho"));
+                
+                if (semPlano) {
+                    int opt = JOptionPane.showConfirmDialog(this, 
+                        "Este médico atenderá como CONSULTA PARTICULAR.\nO valor será definido no momento do atendimento.\nDeseja confirmar?", 
+                        "Consulta Particular", JOptionPane.YES_NO_OPTION);
                     if (opt != JOptionPane.YES_OPTION) return;
                 }
                 
@@ -112,6 +147,7 @@ public class TelaAgendamento extends JFrame {
         });
 
         btnVoltar.addActionListener(e -> dispose());
+        
         atualizarReviews();
         setVisible(true);
     }
@@ -131,11 +167,17 @@ public class TelaAgendamento extends JFrame {
         }
         String item = (String) cbMedicos.getSelectedItem();
         int id = Integer.parseInt(item.split(" - ")[0]);
+        
         String media = controller.getMediaAvaliacaoMedico(id);
         List<String> revs = controller.getUltimasAvaliacoes(id);
-        StringBuilder sb = new StringBuilder("Nota: " + media + "\n\n");
-        if(revs.isEmpty()) sb.append("Sem comentários.");
-        else for(String r : revs) sb.append("• ").append(r).append("\n");
+        
+        StringBuilder sb = new StringBuilder();
+        sb.append("NOTA MÉDIA: ").append(media).append("\n\n");
+        sb.append("Últimos Comentários:\n--------------------------------\n");
+        
+        if(revs.isEmpty()) sb.append("(Nenhuma avaliação escrita ainda)");
+        else for(String r : revs) sb.append("• ").append(r).append("\n\n");
+        
         txtReviews.setText(sb.toString());
         txtReviews.setCaretPosition(0);
     }
