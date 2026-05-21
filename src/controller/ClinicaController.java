@@ -256,7 +256,7 @@ public class ClinicaController {
         for (int i = consultas.size() - 1; i >= 0; i--) {
             Consulta c = consultas.get(i);
             if (c.getIdMedico() == id && c.getAvaliacaoEstrelas() > 0) {
-                r.add("★" + c.getAvaliacaoEstrelas() + ": " + c.getAvaliacaoTexto());
+                r.add("*" + c.getAvaliacaoEstrelas() + ": " + c.getAvaliacaoTexto());
                 if (r.size() >= 5) break;
             }
         }

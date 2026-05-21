@@ -38,6 +38,26 @@ public class TelaCadastro extends JFrame {
         painelVariavel.setLayout(cardLayout);
 
         // DATA
+
+        /*
+        JPanel pnlData = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        cbDia = new JComboBox<>();
+        cbMes = new JComboBox<>();
+        cbAno = new JComboBox<>();
+        int anoAtual = LocalDate.now().getYear();
+        for (int i = anoAtual; i >= 1900; i--) cbAno.addItem(i);
+        for (int i = 1; i <= 12; i++) cbMes.addItem(i);
+        cbMes.addActionListener(e -> atualizarDias());
+        cbAno.addActionListener(e -> atualizarDias());
+        atualizarDias();
+        
+        pnlData.add(cbDia); pnlData.add(new JLabel("/"));
+        pnlData.add(cbMes); pnlData.add(new JLabel("/"));
+        pnlData.add(cbAno);
+        painelDadoExtra.add(pnlData, "DATA");
+        
+        pnlDados.add(painelDadoExtra, gbcDados);
+
         JPanel pnlData = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         cbDia = new JComboBox<>(); cbMes = new JComboBox<>(); cbAno = new JComboBox<>();
         int anoAtual = LocalDate.now().getYear();
@@ -48,6 +68,19 @@ public class TelaCadastro extends JFrame {
         atualizarDias();
         pnlData.add(cbDia); pnlData.add(new JLabel("/")); pnlData.add(cbMes); pnlData.add(new JLabel("/")); pnlData.add(cbAno);
 
+        */
+
+        JPanel pnlData = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
+        cbDia = new JComboBox<>(); cbMes = new JComboBox<>(); cbAno = new JComboBox<>();
+        int anoAtual = LocalDate.now().getYear();
+        for (int i = anoAtual; i >= 1900; i--) cbAno.addItem(i);
+        for (int i = 1; i <= 12; i++) cbMes.addItem(i);
+        cbMes.addActionListener(e -> atualizarDias());
+        cbAno.addActionListener(e -> atualizarDias());
+        atualizarDias();
+        pnlData.add(cbDia); pnlData.add(new JLabel("/")); pnlData.add(cbMes); pnlData.add(new JLabel("/")); pnlData.add(cbAno);
+        
+    
         // ESPECIALIDADE
         JPanel pnlEsp = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         cbEspecialidade = new JComboBox<>(ClinicaController.ESPECIALIDADES);
@@ -122,11 +155,25 @@ public class TelaCadastro extends JFrame {
     }
     
     private void atualizarDias() {
-        if (cbMes.getSelectedItem() == null || cbAno.getSelectedItem() == null) return;
-        int m = (int) cbMes.getSelectedItem();
-        int a = (int) cbAno.getSelectedItem();
+        Object diaAnterior = cbDia.getSelectedItem();
+            
+        int mes = (cbMes.getSelectedItem() != null) ? (int) cbMes.getSelectedItem() : 1;
+        int ano = (cbAno.getSelectedItem() != null) ? (int) cbAno.getSelectedItem() : LocalDate.now().getYear();
+        
+        int maxDias = YearMonth.of(ano, mes).lengthOfMonth();
+        
         cbDia.removeAllItems();
-        int max = YearMonth.of(a, m).lengthOfMonth();
-        for (int i = 1; i <= max; i++) cbDia.addItem(i);
+        for (int i = 1; i <= maxDias; i++) {
+            cbDia.addItem(i);
+        }
+        
+        if (diaAnterior != null) {
+            int diaInt = (int) diaAnterior;
+            if (diaInt > maxDias) {
+                cbDia.setSelectedItem(maxDias);
+            } else {
+                cbDia.setSelectedItem(diaInt);
+            }
+        }
     }
 }

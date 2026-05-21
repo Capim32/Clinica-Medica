@@ -1,1 +1,2 @@
 1;1;01/01/2026;REALIZADA;1200.0;1;me mandou tirar uma soneca que amanhã é outro dia sendo que perdi as pernas em um acidente de balão;Paciente chato queria um atestado só porque perdeu as duas pernas em um acidente de balão, receitei tilenol e uma soneca que amanhã é outro dia.
+1;1;17/12/2025;REALIZADA;120.0;5;;Sem obs
