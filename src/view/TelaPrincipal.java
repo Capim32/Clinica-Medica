@@ -18,6 +18,8 @@ public class TelaPrincipal extends JFrame {
     private DefaultTableModel tableModel;
     private JComboBox<Integer> cbDia, cbMes, cbAno;
     private JComboBox<String> cbFiltroEspecialidade, cbFiltroNome;
+    private JList<String> listResultados; 
+    private List<Medico> medicosExibidosAtualmente;
     private DefaultListModel<String> listModelMedicos;
 
     private final Color COR_HEADER = new Color(0, 102, 204);
@@ -37,7 +39,7 @@ public class TelaPrincipal extends JFrame {
         setLocationRelativeTo(null);
         setLayout(new BorderLayout());
 
-        // HEADER
+        // HEADER BUCETA
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBackground(COR_HEADER);
         headerPanel.setBorder(new EmptyBorder(15, 20, 15, 20));
@@ -146,7 +148,23 @@ public class TelaPrincipal extends JFrame {
         JButton b3 = new JButton("Avaliar");
         JButton b4 = new JButton("Perfil");
 
-        b1.addActionListener(e -> controller.abrirTelaAgendamento());
+        b1.addActionListener(e -> {
+    // 1. Pega o índice selecionado na JList
+    int index = listResultados.getSelectedIndex();
+    
+    // 2. Valida se o usuário clicou em algum médico
+    if (index < 0) { 
+        JOptionPane.showMessageDialog(this, "Por favor, selecione um médico da lista para agendar."); 
+        return; 
+    }
+    
+    // 3. Resgata o objeto Medico real baseado na linha clicada
+    Medico medicoSelecionado = medicosExibidosAtualmente.get(index);
+    
+    // 4. Passa o médico selecionado para a tela de agendamento do seu controller
+    // (Nota: Verifique se o seu controller aceita o objeto Medico ou o ID dele no método)
+    controller.abrirTelaAgendamento(medicoSelecionado); 
+});
         b2.addActionListener(e -> cancelarAgendamento());
         b3.addActionListener(e -> avaliarConsultas());
         b4.addActionListener(e -> abrirDialogoEdicaoPaciente());
@@ -163,9 +181,10 @@ public class TelaPrincipal extends JFrame {
         listModelMedicos.clear();
         String esp = (String) cbFiltroEspecialidade.getSelectedItem();
         String nome = (String) cbFiltroNome.getEditor().getItem();
-        List<Medico> res = controller.buscarMedicosPorFiltro(esp, nome);
         
-        for(Medico m : res) { 
+        medicosExibidosAtualmente = controller.buscarMedicosPorFiltro(esp, nome);
+        
+        for(Medico m : medicosExibidosAtualmente) { 
             String media = controller.getMediaAvaliacaoMedico(m.getId());
             String plano = m.getPlanoDeSaude();
             String planoExibicao;

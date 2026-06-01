@@ -33,7 +33,7 @@ public class ClinicaController {
     public void abrirTelaLogin() { new TelaLogin(this); }
     public void abrirTelaCadastro() { new TelaCadastro(this); }
     
-    public void abrirTelaAgendamento() {
+    public void abrirTelaAgendamento(Medico medico) {
         if (pacienteLogado != null) {
             new TelaAgendamento(this, pacienteLogado);
         } else {
