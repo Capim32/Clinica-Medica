@@ -4,7 +4,7 @@ import javax.swing.UIManager.LookAndFeelInfo;
 
 public class Main {
     public static void main(String[] args) {
-        // tenta aplicar o tema Nimbus (Visual Moderno)
+        // tenta aplicar o tema Nimbus
         try {
             for (LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
                 if ("Nimbus".equals(info.getName())) {

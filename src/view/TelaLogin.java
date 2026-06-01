@@ -10,141 +10,157 @@ import javax.swing.border.EmptyBorder;
 public class TelaLogin extends JFrame {
     private ClinicaController controller;
     
-    // painéis principais
-    private JPanel painelCampos;
-    private CardLayout cardLayoutMain; // alterna entre ID e DADOS
-
-    // painel de Dado extra (Especialidade ou Data)
-    private JPanel painelDadoExtra;
-    private CardLayout cardLayoutExtra; // alterna entre Combo Especialidade e Combo Data
+    // painéis principais 
+    private JPanel painelCamposDinamicos;
+    private CardLayout cardLayoutMain; // altera entre ID e Dados
     
+    private JPanel painelDadoExtra;
+    private CardLayout cardLayoutExtra;
+
+    // campos de entrada
     private JTextField txtId;
     private JTextField txtNome;
     
-    private JComboBox<String> cbEspecialidadeLogin;
-    private JComboBox<Integer> cbDia, cbMes, cbAno;
-    
     private JComboBox<String> cbTipoUser;
     private JComboBox<String> cbModo;
+    
+    // seletores específicos
+    private JComboBox<String> cbEspecialidadeLogin;
+    private JComboBox<Integer> cbDia, cbMes, cbAno;
     
     private JLabel lblDadoExtra;
 
     public TelaLogin(ClinicaController controller) {
         this.controller = controller;
-        setTitle("Login - Clínica Médica");
-        setSize(400, 500);
+        setTitle("Acesso ao Sistema");
+        setSize(420, 480);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        
-        // BorderLayout para fixar botões embaixo e titulo em cima
         setLayout(new BorderLayout());
 
-        // --- 1. CABEÇALHO ---
-        JLabel lblTitulo = new JLabel("Acesso ao Sistema", SwingConstants.CENTER);
-        lblTitulo.setFont(new Font("Arial", Font.BOLD, 18));
-        lblTitulo.setBorder(new EmptyBorder(20, 0, 10, 0));
-        add(lblTitulo, BorderLayout.NORTH);
+        // 1. cabeçalho
+        JPanel pnlHeader = new JPanel();
+        pnlHeader.setBackground(new Color(245, 245, 245));
+        pnlHeader.setBorder(new EmptyBorder(15, 0, 15, 0));
+        JLabel lblTitulo = new JLabel("CliniCafé Login");
+        lblTitulo.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        lblTitulo.setForeground(new Color(0, 102, 204));
+        pnlHeader.add(lblTitulo);
+        add(pnlHeader, BorderLayout.NORTH);
 
-        // --- 2. CONTEÚDO CENTRAL ---
-        JPanel painelCentral = new JPanel();
-        painelCentral.setLayout(new BoxLayout(painelCentral, BoxLayout.Y_AXIS));
-        painelCentral.setBorder(new EmptyBorder(10, 20, 10, 20)); // Margens laterais
-
-        // tipo de usuário
-        JPanel pnlTipo = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pnlTipo.add(new JLabel("Eu sou: "));
+        // 2. formulário
+        JPanel pnlCentral = new JPanel(new GridBagLayout());
+        pnlCentral.setBorder(new EmptyBorder(20, 20, 20, 20));
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(8, 5, 8, 5); // margem entre componentes
+        gbc.fill = GridBagConstraints.HORIZONTAL;
+        
+        // --- Linha 0: tipo de usuário ---
+        gbc.gridx = 0; gbc.gridy = 0; gbc.weightx = 0.3;
+        pnlCentral.add(new JLabel("Eu sou:", SwingConstants.RIGHT), gbc);
+        
+        gbc.gridx = 1; gbc.weightx = 0.7;
         cbTipoUser = new JComboBox<>(new String[]{"Médico", "Paciente"});
-        cbTipoUser.setPreferredSize(new Dimension(150, 25));
-        pnlTipo.add(cbTipoUser);
-        painelCentral.add(pnlTipo);
+        pnlCentral.add(cbTipoUser, gbc);
 
-        // modo de login
-        JPanel pnlModo = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pnlModo.add(new JLabel("Entrar com: "));
+        // --- linha 1: modo de acesso ---
+        gbc.gridx = 0; gbc.gridy = 1; gbc.weightx = 0.3;
+        pnlCentral.add(new JLabel("Entrar com:", SwingConstants.RIGHT), gbc);
+        
+        gbc.gridx = 1; gbc.weightx = 0.7;
         cbModo = new JComboBox<>(new String[]{"ID", "Dados Pessoais"});
-        cbModo.setPreferredSize(new Dimension(150, 25));
-        pnlModo.add(cbModo);
-        painelCentral.add(pnlModo);
+        pnlCentral.add(cbModo, gbc);
 
-        painelCentral.add(Box.createVerticalStrut(15)); 
-        // área dinâmica
-        painelCampos = new JPanel();
+        // --- linha 2: separador ---
+        gbc.gridx = 0; gbc.gridy = 2; gbc.gridwidth = 2;
+        pnlCentral.add(new JSeparator(), gbc);
+
+        // --- Linha 3:ID ou Dados ---
+        gbc.gridy = 3; 
+        
+        painelCamposDinamicos = new JPanel();
         cardLayoutMain = new CardLayout();
-        painelCampos.setLayout(cardLayoutMain);
-        painelCampos.setBorder(BorderFactory.createTitledBorder("Credenciais"));
-
+        painelCamposDinamicos.setLayout(cardLayoutMain);
+        
         // login por ID
-        JPanel pnlId = new JPanel(new GridBagLayout()); // Centraliza o campo
-        JPanel pnlIdInterno = new JPanel(new FlowLayout(FlowLayout.CENTER));
-        pnlIdInterno.add(new JLabel("ID do Usuário: "));
-        txtId = new JTextField(10);
-        pnlIdInterno.add(txtId);
-        pnlId.add(pnlIdInterno);
-        painelCampos.add(pnlId, "ID");
-
+        JPanel pnlID = new JPanel(new GridBagLayout());
+        GridBagConstraints gbcId = new GridBagConstraints();
+        gbcId.insets = new Insets(5, 5, 5, 5);
+        gbcId.gridx = 0; gbcId.gridy = 0;
+        pnlID.add(new JLabel("ID do Usuário:"), gbcId);
+        gbcId.gridx = 1; gbcId.weightx = 1.0; gbcId.fill = GridBagConstraints.HORIZONTAL;
+        txtId = new JTextField();
+        txtId.setPreferredSize(new Dimension(150, 30));
+        pnlID.add(txtId, gbcId);
+        
         // login por Dados
-        JPanel pnlDados = new JPanel();
-        pnlDados.setLayout(new BoxLayout(pnlDados, BoxLayout.Y_AXIS));
+        JPanel pnlDados = new JPanel(new GridBagLayout());
+        GridBagConstraints gbcDados = new GridBagConstraints();
+        gbcDados.insets = new Insets(5, 5, 5, 5);
+        gbcDados.fill = GridBagConstraints.HORIZONTAL;
         
         // nome
-        JPanel pnlNome = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        pnlNome.add(new JLabel("Nome Completo:"));
-        txtNome = new JTextField(20);
-        pnlNome.add(txtNome);
-        pnlDados.add(pnlNome);
+        gbcDados.gridx = 0; gbcDados.gridy = 0; gbcDados.weightx = 0.3;
+        pnlDados.add(new JLabel("Nome Completo:", SwingConstants.RIGHT), gbcDados);
+        
+        gbcDados.gridx = 1; gbcDados.weightx = 0.7;
+        txtNome = new JTextField();
+        txtNome.setPreferredSize(new Dimension(150, 30));
+        pnlDados.add(txtNome, gbcDados);
+        
+        gbcDados.gridx = 0; gbcDados.gridy = 1; gbcDados.weightx = 0.3;
+        lblDadoExtra = new JLabel("Especialidade:", SwingConstants.RIGHT);
+        pnlDados.add(lblDadoExtra, gbcDados);
         
         // Label variável (Especialidade ou Data)
-        JPanel pnlLbl = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        lblDadoExtra = new JLabel("Especialidade:");
-        pnlLbl.add(lblDadoExtra);
-        pnlDados.add(pnlLbl);
-
+        gbcDados.gridx = 1; gbcDados.weightx = 0.7;
         painelDadoExtra = new JPanel();
         cardLayoutExtra = new CardLayout();
         painelDadoExtra.setLayout(cardLayoutExtra);
-
+        
         // especialidade
-        JPanel pnlEsp = new JPanel(new FlowLayout(FlowLayout.LEFT));
         cbEspecialidadeLogin = new JComboBox<>(ClinicaController.ESPECIALIDADES);
-        cbEspecialidadeLogin.setPreferredSize(new Dimension(230, 25));
-        pnlEsp.add(cbEspecialidadeLogin);
-        painelDadoExtra.add(pnlEsp, "ESPECIALIDADE");
-
+        painelDadoExtra.add(cbEspecialidadeLogin, "ESPECIALIDADE");
+        
         // data
-        JPanel pnlData = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        JPanel pnlData = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         cbDia = new JComboBox<>();
         cbMes = new JComboBox<>();
         cbAno = new JComboBox<>();
-        
         int anoAtual = LocalDate.now().getYear();
         for (int i = anoAtual; i >= 1900; i--) cbAno.addItem(i);
         for (int i = 1; i <= 12; i++) cbMes.addItem(i);
-        
         cbMes.addActionListener(e -> atualizarDias());
         cbAno.addActionListener(e -> atualizarDias());
         atualizarDias();
-
-        pnlData.add(cbDia);
-        pnlData.add(new JLabel("/"));
-        pnlData.add(cbMes);
-        pnlData.add(new JLabel("/"));
+        
+        pnlData.add(cbDia); pnlData.add(new JLabel("/"));
+        pnlData.add(cbMes); pnlData.add(new JLabel("/"));
         pnlData.add(cbAno);
         painelDadoExtra.add(pnlData, "DATA");
-
-        pnlDados.add(painelDadoExtra);
-        painelCampos.add(pnlDados, "DADOS");
-
-        // centraliza a área dinamica
-        painelCentral.add(painelCampos);
         
-        // coloca tudo no Frame
-        add(painelCentral, BorderLayout.CENTER);
+        pnlDados.add(painelDadoExtra, gbcDados);
 
-        JPanel pnlBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 15));
-        JButton btnEntrar = new JButton("Entrar");
-        btnEntrar.setPreferredSize(new Dimension(100, 35));
+        // add cards ao painel principal
+        painelCamposDinamicos.add(pnlID, "ID");
+        painelCamposDinamicos.add(pnlDados, "DADOS");
+        
+        // centraliza a área dinamica
+        pnlCentral.add(painelCamposDinamicos, gbc);
+        
+        // coloca tudo no frame
+        JPanel wrapper = new JPanel(new BorderLayout());
+        wrapper.add(pnlCentral, BorderLayout.NORTH);
+        add(wrapper, BorderLayout.CENTER);
+
+        JPanel pnlBotoes = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 20));
         JButton btnVoltar = new JButton("Voltar");
-        btnVoltar.setPreferredSize(new Dimension(100, 35));
+        JButton btnEntrar = new JButton("Entrar");
+        
+        btnEntrar.setBackground(new Color(0, 102, 204));
+        btnEntrar.setForeground(Color.WHITE);
+        btnEntrar.setPreferredSize(new Dimension(120, 40));
+        btnVoltar.setPreferredSize(new Dimension(100, 40));
         
         pnlBotoes.add(btnVoltar);
         pnlBotoes.add(btnEntrar);
@@ -157,8 +173,8 @@ public class TelaLogin extends JFrame {
         // alterna entre ID e Dados
         cbModo.addActionListener(e -> {
             String modo = (String) cbModo.getSelectedItem();
-            if (modo.equals("ID")) cardLayoutMain.show(painelCampos, "ID");
-            else cardLayoutMain.show(painelCampos, "DADOS");
+            if (modo.equals("ID")) cardLayoutMain.show(painelCamposDinamicos, "ID");
+            else cardLayoutMain.show(painelCamposDinamicos, "DADOS");
         });
 
         // alterna entre Médico e Paciente
@@ -168,7 +184,7 @@ public class TelaLogin extends JFrame {
                 lblDadoExtra.setText("Especialidade:");
                 cardLayoutExtra.show(painelDadoExtra, "ESPECIALIDADE");
             } else {
-                lblDadoExtra.setText("Data de Nascimento:");
+                lblDadoExtra.setText("Data Nasc.:");
                 cardLayoutExtra.show(painelDadoExtra, "DATA");
             }
         });
@@ -214,7 +230,6 @@ public class TelaLogin extends JFrame {
 
         // Estado Inicial
         cardLayoutExtra.show(painelDadoExtra, "ESPECIALIDADE");
-
         setVisible(true);
     }
     
