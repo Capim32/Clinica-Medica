@@ -153,13 +153,29 @@ public class TelaAgendamento extends JFrame {
     }
 
     private void atualizarDias() {
-        if (cbMes.getSelectedItem() == null || cbAno.getSelectedItem() == null) return;
-        int m = (int) cbMes.getSelectedItem();
-        int a = (int) cbAno.getSelectedItem();
-        cbDia.removeAllItems();
-        int max = YearMonth.of(a, m).lengthOfMonth();
-        for (int i=1; i<=max; i++) cbDia.addItem(i);
+    if (cbMes.getSelectedItem() == null || cbAno.getSelectedItem() == null) return;
+        Object diaAnterior = cbDia.getSelectedItem();
+    
+    int m = (int) cbMes.getSelectedItem();
+    int a = (int) cbAno.getSelectedItem();
+    
+    cbDia.removeAllItems();
+    int max = java.time.YearMonth.of(a, m).lengthOfMonth();
+    
+    for (int i = 1; i <= max; i++) {
+        cbDia.addItem(i);
     }
+    
+    if (diaAnterior != null) {
+        int diaInt = (int) diaAnterior;
+        
+        if (diaInt > max) {
+            cbDia.setSelectedItem(max);
+        } else {
+            cbDia.setSelectedItem(diaInt); // mantém o dia que já estava (o grande problema)
+        }
+    }
+}
 
     private void atualizarReviews() {
         if (!cbMedicos.isEnabled() || cbMedicos.getSelectedItem() == null) {
